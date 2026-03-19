@@ -32,6 +32,6 @@ export default defineConfig({
 		})
 	],
 	server: {
-		allowedHosts: ['empty-trains-chew.loca.lt']
+		allowedHosts: ['https://bswww-79-164-121-156.a.free.pinggy.link']
 	}
 });
