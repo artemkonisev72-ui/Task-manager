@@ -36,6 +36,8 @@ export default defineConfig({
         port: 4173,          // твой желаемый порт, например 3000
         strictPort: false,   // если порт занят, попробовать следующий
         allowedHosts: [
+			'whoops.oops.wtf',
+			'oops.wtf',
             '0.0.0.0',      // или 'your_ip_here', или true
             'localhost',
             '127.0.0.1'
