@@ -32,6 +32,6 @@ export default defineConfig({
 		})
 	],
 	server: {
-		allowedHosts: ['https://bswww-79-164-121-156.a.free.pinggy.link']
+		allowedHosts: ['bswww-79-164-121-156.a.free.pinggy.link']
 	}
 });
