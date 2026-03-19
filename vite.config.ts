@@ -30,5 +30,8 @@ export default defineConfig({
 				]
 			}
 		})
-	]
+	],
+	server: {
+		allowedHosts: ['swift-ghosts-jump.loca.lt']
+	}
 });
