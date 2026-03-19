@@ -3,28 +3,26 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite" // TODO: Change back to "postgresql" before prod deployment
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// NOTE: SQLite doesn't support enums natively. We're using a plain String for Role.
-// When migrating to PostgreSQL later, we can reinstate this Enum:
-// enum Role {
-//   ADMIN
-//   MANAGER
-//   EXECUTOR
-// }
+enum Role {
+  ADMIN
+  MANAGER
+  EXECUTOR
+}
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  role         String   @default("EXECUTOR") // "ADMIN", "MANAGER", "EXECUTOR"
-  tasks        Task[]
-  sessions     Session[]
+  id             String          @id @default(uuid())
+  email          String          @unique
+  passwordHash   String
+  role           Role            @default(EXECUTOR)
+  tasks          Task[]
+  sessions       Session[]
   logisticsTasks LogisticsTask[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Board {
@@ -77,20 +75,20 @@ model Session {
 }
 
 model LogisticsTask {
-  id              String   @id @default(uuid())
-  number          String
-  date            DateTime
-  timeStart       String
-  timeEnd         String
-  address         String
-  logistics       String
-  dealContent     String
-  comment         String?
-  checklist       String?
-  amount          Float
+  id          String   @id @default(uuid())
+  number      String
+  date        DateTime
+  timeStart   String
+  timeEnd     String
+  address     String
+  logistics   String
+  dealContent String
+  comment     String?
+  checklist   String?
+  amount      Float
 
-  executors       User[]
+  executors User[]
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
