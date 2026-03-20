@@ -1,2 +1,33 @@
 @import 'tailwindcss';
 @variant dark (&:where(.dark, .dark *));
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+/* Custom slick scrollbars for WebKit (Chrome/Edge/Safari) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* Tailwind gray-300 */
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* Tailwind gray-400 */
+}
+
+/* Dark mode scrollbars */
+html.dark ::-webkit-scrollbar-thumb {
+  background: #475569; /* Tailwind gray-600 */
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b; /* Tailwind gray-500 */
+}
