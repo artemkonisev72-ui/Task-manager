@@ -71,5 +71,16 @@ export const actions: Actions = {
 				}
 			}
 		});
+	},
+	deleteTask: async ({ request, locals }) => {
+		if (locals.user?.role !== 'ADMIN' && locals.user?.role !== 'MANAGER') {
+			return fail(403, { error: 'Недостаточно прав' });
+		}
+
+		const data = await request.formData();
+		const taskId = data.get('taskId') as string;
+		if (!taskId) return fail(400, { error: 'ID задачи не указан' });
+
+		await prisma.logisticsTask.delete({ where: { id: taskId } });
 	}
 };

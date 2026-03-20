@@ -87,6 +87,18 @@
 													<tr><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Сумма к оплате</th><td class="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">{task.amount} руб.</td></tr>
 												</tbody>
 											</table>
+											<form
+												method="POST"
+												action="?/deleteTask"
+												use:enhance
+												class="mt-4 flex justify-end"
+												onsubmit={(e) => { if (!confirm(`Удалить задачу №${task.number}? Это действие необратимо.`)) e.preventDefault(); }}
+											>
+												<input type="hidden" name="taskId" value={task.id} />
+												<button type="submit" class="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-xl transition-colors">
+													Удалить задачу
+												</button>
+											</form>
 										</div>
 									{/if}
 								</div>
