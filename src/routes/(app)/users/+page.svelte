@@ -67,6 +67,12 @@
 											</button>
 										{/if}
 									</form>
+									<form method="POST" action="?/deleteUser" use:enhance class="inline-block" onsubmit={(e) => { if (!confirm('Вы уверены, что хотите удалить этого пользователя? Осторожно: действие необратимо и все сессии пользователя будут закрыты.')) e.preventDefault(); }}>
+										<input type="hidden" name="userId" value={u.id} />
+										<button class="text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 px-4 py-2 rounded-xl transition-colors text-nowrap ml-2">
+											Удалить
+										</button>
+									</form>
 								{:else if u.role === 'ADMIN'}
 									<span class="text-sm text-gray-400 dark:text-gray-500 italic">Полный доступ</span>
 								{/if}

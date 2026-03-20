@@ -39,7 +39,9 @@
 
 <div class="max-w-6xl mx-auto space-y-8 pb-12">
 	<div class="flex items-center justify-between">
-		<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Исполнители</h1>
+		<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+			{data.isManager ? 'Исполнители' : 'Мои заявки'}
+		</h1>
 	</div>
 
 	{#if form?.error}
@@ -132,7 +134,6 @@
 	{:else}
 		<!-- Исполнитель вид -->
 		<div class="space-y-4">
-			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Мои задачи логистики</h2>
 			{#if data.tasks?.length === 0}
 				<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center text-gray-500 dark:text-gray-400">
 					У вас пока нет задач

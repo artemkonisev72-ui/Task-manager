@@ -74,5 +74,27 @@ export const actions: Actions = {
 		await prisma.user.create({
 			data: { login, passwordHash, role: role as 'EXECUTOR' | 'MANAGER' }
 		});
+	},
+	deleteUser: async ({ request, locals }) => {
+		if (locals.user?.role !== 'ADMIN') {
+			return fail(403, { error: 'Недостаточно прав' });
+		}
+
+		const data = await request.formData();
+		const targetUserId = data.get('userId') as string;
+
+		if (!targetUserId) return fail(400, { error: 'Укажите ID пользователя' });
+		if (targetUserId === locals.user?.id) return fail(400, { error: 'Нельзя удалить собственный аккаунт' });
+
+		const targetUser = await prisma.user.findUnique({
+			where: { id: targetUserId }
+		});
+
+		if (!targetUser) return fail(404, { error: 'Пользователь не найден' });
+		if (targetUser.role === 'ADMIN') return fail(400, { error: 'Нельзя удалять других администраторов' });
+
+		await prisma.user.delete({
+			where: { id: targetUserId }
+		});
 	}
 };
