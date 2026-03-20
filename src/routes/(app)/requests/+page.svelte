@@ -18,6 +18,7 @@
 		const sorted = [...taskDates].sort();
 		const start = new Date(sorted[0] + 'T00:00:00');
 		const end = new Date(sorted[sorted.length - 1] + 'T00:00:00');
+		end.setDate(end.getDate() + 30);
 		const result: string[] = [];
 		const cur = new Date(start);
 		while (cur <= end) {
