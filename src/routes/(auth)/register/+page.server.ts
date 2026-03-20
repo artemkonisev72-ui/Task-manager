@@ -28,6 +28,6 @@ export const actions: Actions = {
 			console.error("REGISTER ERROR:", e);
 			return fail(500, { error: e.message || String(e) });
 		}
-		throw redirect(303, '/boards');
+		throw redirect(303, '/logistics');
 	}
 };

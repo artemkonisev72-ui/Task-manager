@@ -11,9 +11,6 @@
 		</div>
 
 		<nav class="flex-1 space-y-2">
-			<a href="/boards" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-50 hover:text-gray-900 text-gray-600">
-				Мои доски
-			</a>
             <a href="/logistics" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-50 hover:text-gray-900 text-gray-600">
                 Задачи логистики
             </a>

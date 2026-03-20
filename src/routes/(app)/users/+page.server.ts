@@ -5,7 +5,7 @@ import prisma from '$lib/server/prisma';
 export const load: PageServerLoad = async ({ parent }) => {
 	const { user } = await parent();
 	if (user.role !== 'ADMIN') {
-		throw redirect(303, '/boards');
+		throw redirect(303, '/logistics');
 	}
 
 	const users = await prisma.user.findMany({
