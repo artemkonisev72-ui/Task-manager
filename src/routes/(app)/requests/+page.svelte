@@ -2,16 +2,33 @@
 	import { onMount, tick } from 'svelte';
 	let { data } = $props();
 
-	// Build unique sorted dates from tasks
-	function getUniqueDates() {
-		const dateSet = new Set<string>();
+	// Build set of dates that have tasks
+	function getTaskDates(): Set<string> {
+		const s = new Set<string>();
 		for (const task of data.tasks) {
-			dateSet.add(new Date(task.date).toISOString().split('T')[0]);
+			s.add(new Date(task.date).toISOString().split('T')[0]);
 		}
-		return [...dateSet].sort();
+		return s;
 	}
 
-	let dates = $derived(getUniqueDates());
+	// Build continuous date range from earliest to latest task date
+	function buildDateRange(): string[] {
+		if (data.tasks.length === 0) return [];
+		const taskDates = getTaskDates();
+		const sorted = [...taskDates].sort();
+		const start = new Date(sorted[0] + 'T00:00:00');
+		const end = new Date(sorted[sorted.length - 1] + 'T00:00:00');
+		const result: string[] = [];
+		const cur = new Date(start);
+		while (cur <= end) {
+			result.push(cur.toISOString().split('T')[0]);
+			cur.setDate(cur.getDate() + 1);
+		}
+		return result;
+	}
+
+	let taskDatesSet = $derived(getTaskDates());
+	let dates = $derived(buildDateRange());
 	let selectedDate = $state('');
 	let dateSlider: HTMLDivElement | undefined = $state(undefined);
 
@@ -23,13 +40,21 @@
 
 	// Tasks for the selected date
 	let tasksForDate = $derived(
-		data.tasks.filter(t => new Date(t.date).toISOString().split('T')[0] === selectedDate)
+		data.tasks.filter((t: any) => new Date(t.date).toISOString().split('T')[0] === selectedDate)
 	);
+
+	function hasTasks(iso: string): boolean {
+		return taskDatesSet.has(iso);
+	}
 
 	// Format helpers
 	function formatDateShort(iso: string) {
 		const d = new Date(iso + 'T00:00:00');
 		return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+	}
+	function formatWeekday(iso: string) {
+		const d = new Date(iso + 'T00:00:00');
+		return d.toLocaleDateString('ru-RU', { weekday: 'short' });
 	}
 	function formatDateFull(iso: string) {
 		const d = new Date(iso + 'T00:00:00');
@@ -47,7 +72,6 @@
 
 	onMount(async () => {
 		const today = todayISO();
-		// Select today or nearest future date
 		if (dates.includes(today)) {
 			selectedDate = today;
 		} else {
@@ -89,14 +113,14 @@
 		<!-- Date slider -->
 		<div
 			bind:this={dateSlider}
-			class="flex gap-2 overflow-x-auto pb-2 scrollbar-thin"
+			class="flex gap-2 overflow-x-auto pb-3 px-1 -mx-1"
 			style="scroll-behavior: smooth;"
 		>
 			{#each dates as d}
 				<button
 					data-active={selectedDate === d ? 'true' : 'false'}
 					onclick={() => selectDate(d)}
-					class="shrink-0 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap border
+					class="shrink-0 flex flex-col items-center px-3 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap border min-w-[54px]
 						{selectedDate === d
 							? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white shadow-md'
 							: isPast(d)
@@ -104,9 +128,12 @@
 								: 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}
 						{isToday(d) && selectedDate !== d ? 'ring-2 ring-blue-400 dark:ring-blue-500' : ''}"
 				>
-					{formatDateShort(d)}
+					<span class="text-[10px] uppercase opacity-70">{formatWeekday(d)}</span>
+					<span class="text-sm">{formatDateShort(d)}</span>
 					{#if isToday(d)}
-						<span class="ml-1 text-[10px] opacity-60">сегодня</span>
+						<span class="text-[9px] opacity-60 mt-0.5">сегодня</span>
+					{:else if hasTasks(d)}
+						<span class="w-1.5 h-1.5 rounded-full mt-1 {selectedDate === d ? 'bg-white dark:bg-black' : 'bg-blue-500 dark:bg-blue-400'}"></span>
 					{/if}
 				</button>
 			{/each}
