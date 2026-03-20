@@ -2,7 +2,6 @@ import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { defineConfig } from 'vite';
-import basicSsl from '@vitejs/plugin-basic-ssl';
 
 export default defineConfig({
 	plugins: [
@@ -42,22 +41,31 @@ export default defineConfig({
 					}
 				]
 			}
-		}),
-
-		// basicSsl({
-		// 	domains: ['whoops.oops.wtf', 'localhost', '127.0.0.1']
-		// })
+		})
 	],
-	define: {'import.meta.env.VITE_PUBLIC_BASE_URL': JSON.stringify('https://whoops.oops.wtf'),},
+	define: { 'import.meta.env.VITE_PUBLIC_BASE_URL': JSON.stringify('https://whoops.oops.wtf') },
 	server: {
-		host: '0.0.0.0',     // слушать все интерфейсы (внешний IP будет виден)
-		port: 4173,          // твой желаемый порт, например 3000
-		strictPort: true,   // если порт занят, попробовать следующий
+		host: '0.0.0.0',
+		port: 4173,
+		strictPort: false,
 		allowedHosts: [
 			'whoops.oops.wtf',
 			'oops.wtf',
-			'0.0.0.0',      // или 'your_ip_here', или true
-			'localhost'
+			'0.0.0.0',
+			'localhost',
+			'127.0.0.1'
+		]
+	},
+	preview: {
+		host: '0.0.0.0',
+		port: 4173,
+		strictPort: false,
+		allowedHosts: [
+			'whoops.oops.wtf',
+			'oops.wtf',
+			'0.0.0.0',
+			'localhost',
+			'127.0.0.1'
 		]
 	}
 });
