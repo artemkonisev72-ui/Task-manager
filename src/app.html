@@ -4,6 +4,15 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#000000" />
+		<script>
+			(function() {
+				var t = localStorage.getItem('theme');
+				var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				if (t === 'dark' || (!t && prefersDark)) {
+					document.documentElement.classList.add('dark');
+				}
+			})();
+		</script>
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<link rel="manifest" href="/manifest.webmanifest" />
 		%sveltekit.head%
