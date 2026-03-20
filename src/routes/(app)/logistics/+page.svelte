@@ -44,9 +44,9 @@
 					<button onclick={() => toggleExecutor(exec.id)} class="w-full px-6 py-5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors text-left focus:outline-none">
 						<div class="flex items-center gap-3">
 							<div class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-700">
-								{exec.email[0].toUpperCase()}
+								{exec.login[0].toUpperCase()}
 							</div>
-							<span class="font-semibold text-gray-900">{exec.email}</span>
+							<span class="font-semibold text-gray-900">{exec.login}</span>
 						</div>
 						<div class="flex items-center gap-4">
 							<span class="text-sm font-medium text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200">
@@ -164,7 +164,7 @@
 							{#each data.executors || [] as exec}
 								<label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-white transition-colors">
 									<input type="checkbox" name="executorIds" value={exec.id} class="w-5 h-5 rounded border-gray-300 text-black focus:ring-black" />
-									<span class="font-medium text-gray-800">{exec.email}</span>
+									<span class="font-medium text-gray-800">{exec.login}</span>
 								</label>
 							{/each}
 						</div>

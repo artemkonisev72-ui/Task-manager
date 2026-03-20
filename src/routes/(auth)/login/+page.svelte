@@ -11,15 +11,15 @@
 
 		<form method="POST" class="space-y-4">
 			<div>
-				<label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+				<label for="login" class="block text-sm font-medium text-gray-700 mb-1">Логин</label>
 				<input
-					id="email"
-					name="email"
-					type="email"
+					id="login"
+					name="login"
+					type="text"
 					required
-					value={form?.email ?? ''}
+					value={form?.login ?? ''}
 					class="w-full px-4 py-3 bg-gray-50 border-transparent rounded-2xl focus:border-black focus:ring-0 focus:bg-white transition-colors"
-					placeholder="вы@пример.com"
+					placeholder="Ваш логин"
 				/>
 			</div>
 
@@ -37,7 +37,10 @@
 					<p class="text-red-500 text-xs mt-2">Заполните все поля.</p>
 				{/if}
 				{#if form?.incorrect}
-					<p class="text-red-500 text-xs mt-2">Неверный email или пароль.</p>
+					<p class="text-red-500 text-xs mt-2">Неверный логин или пароль.</p>
+				{/if}
+				{#if form?.error}
+					<p class="text-red-500 text-xs mt-2">Ошибка сервера: {form.error}</p>
 				{/if}
 			</div>
 
@@ -48,9 +51,5 @@
 				Войти
 			</button>
 		</form>
-
-		<p class="text-center text-sm text-gray-500 mt-6">
-			Нет аккаунта? <a href="/register" class="text-black font-medium hover:underline">Создать</a>
-		</p>
 	</div>
 </div>

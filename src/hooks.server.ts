@@ -1,32 +1,50 @@
 import type { Handle } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
+import bcrypt from 'bcryptjs';
+
+// Seed admin on first server start
+let seeded = false;
+async function ensureAdmin() {
+    if (seeded) return;
+    seeded = true;
+    const existing = await prisma.user.findUnique({ where: { login: 'admin' } });
+    if (!existing) {
+        const passwordHash = await bcrypt.hash('123456', 10);
+        await prisma.user.create({
+            data: { login: 'admin', passwordHash, role: 'ADMIN' }
+        });
+        console.log('[SEED] Admin user created (login: admin, password: 123456)');
+    }
+}
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const sessionId = event.cookies.get('session');
+    await ensureAdmin();
 
-	if (!sessionId) {
-		event.locals.user = null;
-		return resolve(event);
-	}
+    const sessionId = event.cookies.get('session');
 
-	const session = await prisma.session.findUnique({
-		where: { id: sessionId },
-		include: { user: true }
-	});
+    if (!sessionId) {
+        event.locals.user = null;
+        return resolve(event);
+    }
 
-	if (session && session.expiresAt > new Date()) {
-		event.locals.user = {
-			id: session.user.id,
-			email: session.user.email,
-			role: session.user.role
-		};
-	} else {
-		event.locals.user = null;
-		if (session) {
-			await prisma.session.delete({ where: { id: sessionId } });
-		}
-		event.cookies.delete('session', { path: '/' });
-	}
+    const session = await prisma.session.findUnique({
+        where: { id: sessionId },
+        include: { user: true }
+    });
 
-	return resolve(event);
+    if (session && session.expiresAt > new Date()) {
+        event.locals.user = {
+            id: session.user.id,
+            login: session.user.login,
+            role: session.user.role
+        };
+    } else {
+        event.locals.user = null;
+        if (session) {
+            await prisma.session.delete({ where: { id: sessionId } });
+        }
+        event.cookies.delete('session', { path: '/' });
+    }
+
+    return resolve(event);
 };

@@ -1,16 +1,17 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import prisma from '$lib/server/prisma';
+import bcrypt from 'bcryptjs';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { user } = await parent();
-	if (user.role !== 'ADMIN') {
+	if (user.role !== 'ADMIN' && user.role !== 'MANAGER') {
 		throw redirect(303, '/logistics');
 	}
 
 	const users = await prisma.user.findMany({
 		orderBy: { createdAt: 'desc' },
-		select: { id: true, email: true, role: true, createdAt: true }
+		select: { id: true, login: true, role: true, createdAt: true }
 	});
 
 	return { users };
@@ -40,6 +41,38 @@ export const actions: Actions = {
 		await prisma.user.update({
 			where: { id: targetUserId },
 			data: { role: newRole }
+		});
+	},
+	createUser: async ({ request, locals }) => {
+		if (locals.user?.role !== 'ADMIN' && locals.user?.role !== 'MANAGER') {
+			return fail(403, { error: 'Недостаточно прав' });
+		}
+
+		const data = await request.formData();
+		const login = data.get('login') as string;
+		const password = data.get('password') as string;
+		const role = data.get('role') as string;
+
+		if (!login || !password || password.length < 6) {
+			return fail(400, { error: 'Логин и пароль (мин. 6 символов) обязательны' });
+		}
+
+		if (locals.user?.role === 'MANAGER' && role !== 'EXECUTOR') {
+			return fail(403, { error: 'Менеджер может создавать только исполнителей' });
+		}
+
+		if (role === 'ADMIN') {
+			return fail(403, { error: 'Нельзя создавать администраторов' });
+		}
+
+		const existing = await prisma.user.findUnique({ where: { login } });
+		if (existing) {
+			return fail(400, { error: 'Пользователь с таким логином уже существует' });
+		}
+
+		const passwordHash = await bcrypt.hash(password, 10);
+		await prisma.user.create({
+			data: { login, passwordHash, role: role as 'EXECUTOR' | 'MANAGER' }
 		});
 	}
 };

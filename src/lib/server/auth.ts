@@ -1,6 +1,6 @@
 import prisma from './prisma';
 import type { Cookies } from '@sveltejs/kit';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 export async function setSession(userId: string, cookies: Cookies) {
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);

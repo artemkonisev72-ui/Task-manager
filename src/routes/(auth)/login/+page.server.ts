@@ -8,16 +8,16 @@ export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		try {
 			const data = await request.formData();
-			const email = data.get('email') as string;
+			const login = data.get('login') as string;
 			const password = data.get('password') as string;
 
-			if (!email || !password) { return fail(400, { email, missing: true }); }
+			if (!login || !password) { return fail(400, { login, missing: true }); }
 
-			const user = await prisma.user.findUnique({ where: { email } });
-			if (!user) { return fail(400, { email, incorrect: true }); }
+			const user = await prisma.user.findUnique({ where: { login } });
+			if (!user) { return fail(400, { login, incorrect: true }); }
 
 			const valid = await bcrypt.compare(password, user.passwordHash);
-			if (!valid) { return fail(400, { email, incorrect: true }); }
+			if (!valid) { return fail(400, { login, incorrect: true }); }
 
 			await setSession(user.id, cookies);
 		} catch (e: any) {
