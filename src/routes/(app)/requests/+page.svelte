@@ -113,7 +113,7 @@
 		<!-- Date slider -->
 		<div
 			bind:this={dateSlider}
-			class="flex gap-2 overflow-x-auto pb-3 px-1 -mx-1"
+			class="flex gap-2 overflow-x-auto pb-3 pt-1 px-2 -mx-2"
 			style="scroll-behavior: smooth;"
 		>
 			{#each dates as d}
