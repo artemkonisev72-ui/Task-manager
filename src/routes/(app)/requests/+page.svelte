@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	let { data } = $props();
+	import { enhance } from '$app/forms';
+	let { data, form } = $props();
+	
+	let showModal = $state(false);
 
 	// Build set of dates that have tasks
 	function getTaskDates(): Set<string> {
@@ -104,7 +107,18 @@
 </svelte:head>
 
 <div class="max-w-6xl mx-auto space-y-6 pb-12">
-	<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Заявки</h1>
+	<div class="flex items-center justify-between">
+		<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Заявки</h1>
+		{#if data.isManager}
+			<button onclick={() => showModal = true} class="bg-black dark:bg-white text-white dark:text-black px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm shrink-0">
+				+ Новая заявка
+			</button>
+		{/if}
+	</div>
+
+	{#if form?.error}
+		<div class="p-4 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl text-sm">{form.error}</div>
+	{/if}
 
 	{#if dates.length === 0}
 		<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center text-gray-500 dark:text-gray-400">
@@ -201,3 +215,47 @@
 		{/if}
 	{/if}
 </div>
+
+<!-- Create task modal -->
+{#if showModal}
+	<div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+			<div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 shrink-0">
+				<h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Новая заявка</h3>
+				<button onclick={() => showModal = false} class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" aria-label="Закрыть">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+				</button>
+			</div>
+			<form method="POST" action="/logistics?/createTask" use:enhance class="flex-1 overflow-y-auto p-6 space-y-5">
+				<div class="grid grid-cols-2 gap-5">
+					<div><label for="c-number" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Номер</label><input id="c-number" name="number" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" placeholder="№ 12345" /></div>
+					<div><label for="c-date" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Дата</label><input id="c-date" type="date" name="date" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" /></div>
+					<div><label for="c-start" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Начало (HH:mm)</label><input id="c-start" type="time" name="timeStart" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" /></div>
+					<div><label for="c-end" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Конец (HH:mm)</label><input id="c-end" type="time" name="timeEnd" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" /></div>
+				</div>
+				<div><label for="c-address" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Адрес</label><input id="c-address" name="address" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" /></div>
+				<div><label for="c-logistics" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Логистика</label><textarea id="c-logistics" name="logistics" required rows="2" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors resize-none"></textarea></div>
+				<div><label for="c-deal" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Наполнение сделки</label><textarea id="c-deal" name="dealContent" required rows="2" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors resize-none"></textarea></div>
+				<div class="grid grid-cols-2 gap-5">
+					<div><label for="c-comment" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Комментарий</label><textarea id="c-comment" name="comment" rows="2" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors resize-none"></textarea></div>
+					<div><label for="c-checklist" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Чек-лист</label><textarea id="c-checklist" name="checklist" rows="2" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors resize-none"></textarea></div>
+				</div>
+				<div><label for="c-amount" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Сумма к оплате</label><input id="c-amount" type="number" step="0.01" name="amount" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" placeholder="1000.50" /></div>
+				<div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+					<label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Назначить исполнителей</label>
+					<div class="space-y-2 max-h-40 overflow-y-auto pr-2">
+						{#each data.executors || [] as exec}
+							<label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-white dark:hover:bg-gray-600 transition-colors">
+								<input type="checkbox" name="executorIds" value={exec.id} class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" />
+								<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
+							</label>
+						{/each}
+					</div>
+				</div>
+				<div class="pt-6 shrink-0 pb-2">
+					<button type="submit" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-md">Создать заявку</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}

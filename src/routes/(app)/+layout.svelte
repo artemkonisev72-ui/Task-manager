@@ -70,7 +70,7 @@
 
 		<nav class="flex-1 space-y-2">
 			<a href="/logistics" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
-				Задачи логистики
+				Исполнители
 			</a>
 			<a href="/requests" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
 				Заявки
