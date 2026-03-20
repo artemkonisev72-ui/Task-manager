@@ -14,18 +14,20 @@
 		return s;
 	}
 
-	// Build continuous date range from earliest to latest task date
+	// Build continuous date range from today - 3 to today + 30
 	function buildDateRange(): string[] {
-		if (data.tasks.length === 0) return [];
-		const taskDates = getTaskDates();
-		const sorted = [...taskDates].sort();
-		const start = new Date(sorted[0] + 'T00:00:00');
-		const end = new Date(sorted[sorted.length - 1] + 'T00:00:00');
+		const start = new Date();
+		start.setDate(start.getDate() - 3);
+		
+		const end = new Date();
 		end.setDate(end.getDate() + 30);
+		
 		const result: string[] = [];
 		const cur = new Date(start);
+		const pad = (n: number) => n.toString().padStart(2, '0');
+		
 		while (cur <= end) {
-			result.push(cur.toISOString().split('T')[0]);
+			result.push(`${cur.getFullYear()}-${pad(cur.getMonth() + 1)}-${pad(cur.getDate())}`);
 			cur.setDate(cur.getDate() + 1);
 		}
 		return result;
