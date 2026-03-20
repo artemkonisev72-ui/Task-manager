@@ -82,5 +82,47 @@ export const actions: Actions = {
 		if (!taskId) return fail(400, { error: 'ID задачи не указан' });
 
 		await prisma.logisticsTask.delete({ where: { id: taskId } });
+	},
+	updateTask: async ({ request, locals }) => {
+		if (locals.user?.role !== 'ADMIN' && locals.user?.role !== 'MANAGER') {
+			return fail(403, { error: 'Недостаточно прав' });
+		}
+
+		const data = await request.formData();
+		const taskId = data.get('taskId') as string;
+		const number = data.get('number') as string;
+		const dateStr = data.get('date') as string;
+		const timeStart = data.get('timeStart') as string;
+		const timeEnd = data.get('timeEnd') as string;
+		const address = data.get('address') as string;
+		const logistics = data.get('logistics') as string;
+		const dealContent = data.get('dealContent') as string;
+		const comment = data.get('comment') as string;
+		const checklist = data.get('checklist') as string;
+		const amountStr = data.get('amount') as string;
+		const executorIds = data.getAll('executorIds') as string[];
+
+		if (!taskId || !number || !dateStr || !timeStart || !timeEnd || !address || !logistics || !dealContent || !amountStr || executorIds.length === 0) {
+			return fail(400, { error: 'Заполните все обязательные поля и выберите хотя бы одного исполнителя' });
+		}
+
+		await prisma.logisticsTask.update({
+			where: { id: taskId },
+			data: {
+				number,
+				date: new Date(dateStr),
+				timeStart,
+				timeEnd,
+				address,
+				logistics,
+				dealContent,
+				comment,
+				checklist,
+				amount: parseFloat(amountStr),
+				executors: {
+					set: executorIds.map(id => ({ id }))
+				}
+			}
+		});
 	}
 };
