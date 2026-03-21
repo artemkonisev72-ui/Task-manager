@@ -174,7 +174,7 @@
 								<h3 class="font-bold text-gray-900 dark:text-gray-100">Уведомления</h3>
 								<button onclick={() => showNotifications = false} class="text-xs font-semibold text-gray-500 hover:text-black dark:hover:text-white">Закрыть</button>
 							</div>
-							<div class="max-h-80 overflow-y-auto w-full divide-y divide-gray-50 dark:divide-gray-700/50">
+							<div class="max-h-[290px] overflow-y-auto w-full divide-y divide-gray-50 dark:divide-gray-700/50 custom-scrollbar">
 								{#if notifications?.length === 0}
 									<p class="p-6 text-center text-sm text-gray-500 dark:text-gray-400">Нет уведомлений</p>
 								{:else}
@@ -278,10 +278,10 @@
 {#if data.user.role === 'EXECUTOR' && pendingAssignments?.length > 0}
 	{@const currentAssignment = pendingAssignments[0]}
 	{@const task = currentAssignment.task}
-	<div class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-		<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+	<div class="fixed inset-0 z-100 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[95vh] animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 			
-			<div class="p-8 text-center bg-blue-50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-900/30">
+			<div class="p-6 md:p-8 text-center bg-blue-50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-900/30 shrink-0">
 				<div class="w-16 h-16 bg-blue-500 text-white rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
 				</div>
@@ -289,18 +289,19 @@
 				<p class="text-gray-600 dark:text-gray-300 font-medium">Пожалуйста, ознакомьтесь с деталями и примите решение.</p>
 			</div>
 
-			<div class="p-6 md:p-8">
+			<div class="p-6 md:p-8 overflow-y-auto">
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm text-gray-900 dark:text-white">
 					<div><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Номер:</p><p class="font-bold">#{task.number}</p></div>
 					<div><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Время:</p><p class="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded inline-block">{new Date(task.date).toLocaleDateString('ru-RU')} {task.timeStart} - {task.timeEnd}</p></div>
-					<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Адрес:</p><p class="font-medium bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 break-words whitespace-pre-wrap">{task.address}</p></div>
-					<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Логистика:</p><p class="bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 break-words whitespace-pre-wrap">{task.logistics}</p></div>
-					<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Наполнение:</p><p class="bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 break-words whitespace-pre-wrap">{task.dealContent}</p></div>
-					{#if task.comment}<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Комментарий:</p><p class="bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 break-words whitespace-pre-wrap">{task.comment}</p></div>{/if}
-					{#if task.checklist}<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Чек-лист:</p><p class="bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 break-words whitespace-pre-wrap">{task.checklist}</p></div>{/if}
+					<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Адрес:</p><p class="font-medium bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 wrap-break-word whitespace-pre-wrap">{task.address}</p></div>
+					<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Логистика:</p><p class="bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 wrap-break-word whitespace-pre-wrap">{task.logistics}</p></div>
+					<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Наполнение:</p><p class="bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 wrap-break-word whitespace-pre-wrap">{task.dealContent}</p></div>
+					{#if task.comment}<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Комментарий:</p><p class="bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 wrap-break-word whitespace-pre-wrap">{task.comment}</p></div>{/if}
+					{#if task.checklist}<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Чек-лист:</p><p class="bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 wrap-break-word whitespace-pre-wrap">{task.checklist}</p></div>{/if}
 				</div>
+			</div>
 
-				<div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center gap-4 justify-between">
+			<div class="p-6 md:p-8 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center gap-4 justify-between shrink-0">
 					
 					<div class="flex items-center gap-2.5 w-full md:w-auto bg-red-50 dark:bg-red-900/10 px-4 py-3 rounded-2xl border border-red-100 dark:border-red-900/30">
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 animate-pulse shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>

@@ -2,6 +2,11 @@ import prisma from '$lib/server/prisma';
 
 export async function cleanupExpiredAssignments() {
 	try {
+		const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+		await prisma.notification.deleteMany({
+			where: { createdAt: { lt: sixHoursAgo } }
+		});
+
 		const expired = await prisma.taskAssignment.findMany({
 			where: { 
 				status: 'PENDING', 
