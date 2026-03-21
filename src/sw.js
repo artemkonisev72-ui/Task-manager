@@ -3,12 +3,12 @@ import { precacheAndRoute } from 'workbox-precaching';
 // Кэшируем системные файлы SvelteKit для работы оффлайн (Внедряется плагином PWA)
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-self.addEventListener('push', function(event) {
+self.addEventListener('push', function (event) {
     if (!event.data) return;
-    
+
     try {
         const payload = event.data.json();
-        
+
         event.waitUntil(
             self.registration.showNotification(payload.title || 'Task Manager', {
                 body: payload.body || payload.message || '',
@@ -28,11 +28,11 @@ self.addEventListener('push', function(event) {
     }
 });
 
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener('notificationclick', function (event) {
     event.notification.close();
-    
+
     event.waitUntil(
-        clients.matchAll({ type: "window" }).then(function(clientList) {
+        clients.matchAll({ type: "window" }).then(function (clientList) {
             for (var i = 0; i < clientList.length; i++) {
                 var client = clientList[i];
                 if ('focus' in client) {

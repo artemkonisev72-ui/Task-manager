@@ -10,7 +10,7 @@ export default defineConfig({
 		SvelteKitPWA({
 			strategies: 'injectManifest',
 			srcDir: 'src',
-			filename: 'my-sw.js', // Изменяем имя, чтобы SvelteKit не конфликтовал с VitePWA
+			filename: 'sw.js', // Изменяем имя, чтобы SvelteKit не конфликтовал с VitePWA
 			registerType: 'autoUpdate',
 			injectRegister: 'auto',
 			devOptions: {
