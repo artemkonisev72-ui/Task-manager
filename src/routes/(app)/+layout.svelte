@@ -14,7 +14,27 @@
 	let showNotifications = $state(false);
 	let rejectActionLoading = $state(false);
 	let timerInterval: any;
+	let pollInterval: any;
 	let now = $state(Date.now());
+
+	let notifications = $state(data.notifications || []);
+	let pendingAssignments = $state(data.pendingAssignments || []);
+
+	$effect(() => {
+		notifications = data.notifications || [];
+		pendingAssignments = data.pendingAssignments || [];
+	});
+
+	async function backgroundPoll() {
+		try {
+			const res = await fetch('/api/ping');
+			if (res.ok) {
+				const json = await res.json();
+				if (json.notifications) notifications = json.notifications;
+				if (json.pendingAssignments) pendingAssignments = json.pendingAssignments;
+			}
+		} catch (e) {}
+	}
 
 	async function subscribeToPush() {
 		if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
@@ -46,10 +66,12 @@
 		}
 
 		timerInterval = setInterval(() => { now = Date.now(); }, 1000);
+		pollInterval = setInterval(backgroundPoll, 30000);
 	});
 
 	onDestroy(() => {
 		if (timerInterval) clearInterval(timerInterval);
+		if (pollInterval) clearInterval(pollInterval);
 	});
 
 	function applyTheme() {
@@ -141,22 +163,22 @@
 				<div class="relative">
 					<button onclick={() => showNotifications = !showNotifications} class="relative p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors bg-gray-50 dark:bg-gray-700 rounded-xl" aria-label="Уведомления">
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-						{#if data.notifications?.filter(n => !n.read).length > 0}
+						{#if notifications?.filter(n => !n.read).length > 0}
 							<span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
 						{/if}
 					</button>
 
 					{#if showNotifications}
-						<div class="absolute top-12 left-0 md:left-auto md:-right-2 w-72 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-xl rounded-2xl z-50 overflow-hidden">
+						<div class="absolute top-12 left-0 md:-left-2 w-72 md:w-80 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-xl rounded-2xl z-50 overflow-hidden">
 							<div class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
 								<h3 class="font-bold text-gray-900 dark:text-gray-100">Уведомления</h3>
 								<button onclick={() => showNotifications = false} class="text-xs font-semibold text-gray-500 hover:text-black dark:hover:text-white">Закрыть</button>
 							</div>
 							<div class="max-h-80 overflow-y-auto w-full divide-y divide-gray-50 dark:divide-gray-700/50">
-								{#if data.notifications?.length === 0}
+								{#if notifications?.length === 0}
 									<p class="p-6 text-center text-sm text-gray-500 dark:text-gray-400">Нет уведомлений</p>
 								{:else}
-									{#each data.notifications || [] as notif}
+									{#each notifications || [] as notif}
 										<div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 block">
 											<p class="text-xs font-bold text-gray-900 dark:text-gray-100 mb-1">{notif.title}</p>
 											<p class="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{notif.message}</p>
@@ -253,8 +275,8 @@
 {/if}
 
 <!-- Executor Pending Assignment Modal -->
-{#if data.user.role === 'EXECUTOR' && data.pendingAssignments?.length > 0}
-	{@const currentAssignment = data.pendingAssignments[0]}
+{#if data.user.role === 'EXECUTOR' && pendingAssignments?.length > 0}
+	{@const currentAssignment = pendingAssignments[0]}
 	{@const task = currentAssignment.task}
 	<div class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
 		<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
