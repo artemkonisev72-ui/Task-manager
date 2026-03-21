@@ -10,8 +10,9 @@ export default defineConfig({
 		SvelteKitPWA({
 			strategies: 'injectManifest',
 			srcDir: 'src',
-			filename: 'service-worker.js',
+			filename: 'my-sw.js', // Изменяем имя, чтобы SvelteKit не конфликтовал с VitePWA
 			registerType: 'autoUpdate',
+			injectRegister: 'auto',
 			devOptions: {
 				enabled: true,
 				type: 'module'

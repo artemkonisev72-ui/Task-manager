@@ -63,10 +63,22 @@
 		} catch (e) { console.error('Push subscription failed:', e); }
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		isDark = localStorage.getItem('theme') === 'dark' ||
 			(!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
 		applyTheme();
+
+		// Принудительно регистрируем наш PWA-совместимый SW
+		if ('serviceWorker' in navigator) {
+			try {
+				await navigator.serviceWorker.register('/my-sw.js', { 
+					type: import.meta.env.DEV ? 'module' : 'classic' 
+				});
+				console.log('Service Worker [/my-sw.js] successfully registered');
+			} catch (err) {
+				console.error('Service Worker registration failed:', err);
+			}
+		}
 
 		if (Notification.permission === 'default') {
 			Notification.requestPermission().then(p => {
