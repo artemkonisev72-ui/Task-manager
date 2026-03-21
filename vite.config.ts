@@ -14,9 +14,9 @@ export default defineConfig({
 				type: 'module'
 			},
 			manifest: {
-				name: 'Task Manager PWA',
-				short_name: 'TaskManager',
-				description: 'A minimalist task manager progressive web app',
+				name: 'Logistics Manager PWA',
+				short_name: 'LogisticsManager',
+				description: 'A minimalist logistics manager progressive web app',
 				theme_color: '#000000',
 				background_color: '#fafafa',
 				display: 'standalone',
