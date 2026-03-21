@@ -6,7 +6,7 @@ self.addEventListener('push', function(event) {
         
         event.waitUntil(
             self.registration.showNotification(payload.title || 'Task Manager', {
-                body: payload.message || '',
+                body: payload.body || payload.message || '',
                 icon: '/favicon.svg',
                 badge: '/favicon.svg',
                 vibrate: [200, 100, 200],
