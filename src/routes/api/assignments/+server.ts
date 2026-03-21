@@ -30,10 +30,27 @@ export async function POST({ request, locals }) {
 	}
 
 	if (action === 'ACCEPT') {
-		await prisma.taskAssignment.update({
-			where: { id: assignment.id },
-			data: { status: 'ACCEPTED' }
+		await prisma.$transaction(async (tx) => {
+			await tx.taskAssignment.update({
+				where: { id: assignment.id },
+				data: { status: 'ACCEPTED' }
+			});
+
+			const managers = await tx.user.findMany({
+				where: { role: { in: ['MANAGER', 'ADMIN'] } }
+			});
+
+			if (managers.length > 0) {
+				await tx.notification.createMany({
+					data: managers.map(mgr => ({
+						userId: mgr.id,
+						title: 'Принятие заявки',
+						message: `Исполнитель ${locals.user.login} принял заявку №${assignment.task.number}.`
+					}))
+				});
+			}
 		});
+
 		return json({ success: true, status: 'ACCEPTED' });
 	}
 
