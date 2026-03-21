@@ -10,10 +10,10 @@ self.addEventListener('push', function (event) {
         const payload = event.data.json();
 
         event.waitUntil(
-            self.registration.showNotification(payload.title || 'Task Manager', {
+            self.registration.showNotification(payload.title || 'LM', {
                 body: payload.body || payload.message || '',
-                icon: '/favicon.svg',
-                badge: '/favicon.svg',
+                icon: '/pwa-192.png',
+                badge: '/pwa-192.png',
                 vibrate: [200, 100, 200],
                 data: payload.url || '/'
             })
