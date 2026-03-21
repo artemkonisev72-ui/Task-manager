@@ -95,15 +95,20 @@
 			(!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
 		applyTheme();
 
-		// Принудительно регистрируем наш PWA-совместимый SW
 		if ('serviceWorker' in navigator) {
 			try {
-				await navigator.serviceWorker.register('/sw.js', { 
-					type: import.meta.env.DEV ? 'module' : 'classic' 
+				const { registerSW } = await import('virtual:pwa-register');
+				registerSW({
+					immediate: true,
+					onRegistered(r: ServiceWorkerRegistration) {
+						console.log('Service Worker dynamically registered:', r);
+					},
+					onRegisterError(err: Error) {
+						console.error('Service Worker registration dynamically failed:', err);
+					}
 				});
-				console.log('Service Worker [/sw.js] successfully registered');
 			} catch (err) {
-				console.error('Service Worker registration failed:', err);
+				console.error('Virtual PWA module missing or error:', err);
 			}
 		}
 
