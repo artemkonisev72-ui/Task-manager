@@ -6,15 +6,16 @@ export const load: PageServerLoad = async ({ parent }) => {
 
 	const isExecutor = user.role === 'EXECUTOR';
 
-	const tasks = await prisma.logisticsTask.findMany({
-		where: isExecutor ? { executors: { some: { id: user.id } } } : undefined,
+	const tasksRaw = await prisma.logisticsTask.findMany({
+		where: isExecutor ? { assignments: { some: { userId: user.id } } } : undefined,
 		orderBy: { date: 'asc' },
-		include: {
-			executors: {
-				select: { id: true, login: true }
-			}
-		}
+		include: { assignments: { include: { user: { select: { id: true, login: true } } } } }
 	});
+
+	const tasks = tasksRaw.map((t: any) => ({
+		...t,
+		executors: t.assignments.map((a: any) => ({ ...a.user, status: a.status }))
+	}));
 
 	let executors: any[] = [];
 	if (!isExecutor) {

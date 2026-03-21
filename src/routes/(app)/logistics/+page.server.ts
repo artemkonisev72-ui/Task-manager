@@ -1,30 +1,29 @@
 import prisma from '$lib/server/prisma';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
+import { sendPushNotification } from '$lib/server/push';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { user } = await parent();
 
 	if (user.role === 'ADMIN' || user.role === 'MANAGER') {
-		const executors = await prisma.user.findMany({
+		const executorsRaw = await prisma.user.findMany({
 			where: { role: 'EXECUTOR' },
-			include: {
-				logisticsTasks: {
-					orderBy: { date: 'desc' }
-				}
-			}
+			include: { assignments: { include: { task: true }, orderBy: { task: { date: 'desc' } } } }
 		});
+		const executors = executorsRaw.map(e => ({
+			id: e.id, login: e.login, role: e.role,
+			logisticsTasks: e.assignments.map(a => ({ ...a.task, assignmentStatus: a.status }))
+		}));
 		return { executors, isManager: true };
 	} else {
 		// EXECUTOR
-		const tasks = await prisma.logisticsTask.findMany({
-			where: {
-				executors: {
-					some: { id: user.id }
-				}
-			},
-			orderBy: { date: 'desc' }
+		const tasksRaw = await prisma.logisticsTask.findMany({
+			where: { assignments: { some: { userId: user.id } } },
+			orderBy: { date: 'desc' },
+			include: { assignments: { where: { userId: user.id } } }
 		});
+		const tasks = tasksRaw.map(t => ({ ...t, assignmentStatus: t.assignments[0]?.status }));
 		return { tasks, isManager: false };
 	}
 };
@@ -54,10 +53,16 @@ export const actions: Actions = {
 			return fail(400, { error: 'Заполните все обязательные поля и выберите хотя бы одного исполнителя' });
 		}
 
+		const dateObj = new Date(dateStr);
+		
+		// If task starts in the future, autoRejectTime = time_until_start / 12
+		const diffMs = dateObj.getTime() - Date.now();
+		const autoRejectAt = diffMs > 0 ? new Date(Date.now() + (diffMs / 12)) : new Date(Date.now() + 1000 * 60 * 60);
+
 		await prisma.logisticsTask.create({
 			data: {
 				number,
-				date: new Date(dateStr),
+				date: dateObj,
 				timeStart,
 				timeEnd,
 				address,
@@ -66,10 +71,15 @@ export const actions: Actions = {
 				comment,
 				checklist,
 				amount: parseFloat(amountStr),
-				executors: {
-					connect: executorIds.map(id => ({ id }))
+				assignments: {
+					create: executorIds.map(id => ({ userId: id, autoRejectAt }))
 				}
 			}
+		});
+
+		// Trigger notifications asynchronously
+		executorIds.forEach(executorId => {
+			sendPushNotification(executorId, 'Новая заявка', `Вам назначена заявка №${number}`);
 		});
 	},
 	deleteTask: async ({ request, locals }) => {
@@ -106,11 +116,30 @@ export const actions: Actions = {
 			return fail(400, { error: 'Заполните все обязательные поля и выберите хотя бы одного исполнителя' });
 		}
 
+		const dateObj = new Date(dateStr);
+		const diffMs = dateObj.getTime() - Date.now();
+		const autoRejectAt = diffMs > 0 ? new Date(Date.now() + (diffMs / 12)) : new Date(Date.now() + 1000 * 60 * 60);
+
+		const existingAssignments = await prisma.taskAssignment.findMany({ where: { taskId } });
+		const existingUserIds = existingAssignments.map(a => a.userId);
+
+		const toAdd = executorIds.filter(id => !existingUserIds.includes(id));
+		const toRemove = existingUserIds.filter(id => !executorIds.includes(id));
+
+		if (toRemove.length > 0) {
+			await prisma.taskAssignment.deleteMany({ where: { taskId, userId: { in: toRemove } } });
+		}
+		if (toAdd.length > 0) {
+			await prisma.taskAssignment.createMany({
+				data: toAdd.map(userId => ({ taskId, userId, autoRejectAt }))
+			});
+		}
+
 		await prisma.logisticsTask.update({
 			where: { id: taskId },
 			data: {
 				number,
-				date: new Date(dateStr),
+				date: dateObj,
 				timeStart,
 				timeEnd,
 				address,
@@ -118,11 +147,13 @@ export const actions: Actions = {
 				dealContent,
 				comment,
 				checklist,
-				amount: parseFloat(amountStr),
-				executors: {
-					set: executorIds.map(id => ({ id }))
-				}
+				amount: parseFloat(amountStr)
 			}
+		});
+
+		// Push to newly added executors
+		toAdd.forEach(executorId => {
+			sendPushNotification(executorId, 'Новая заявка', `Вам назначена заявка №${number}`);
 		});
 	}
 };

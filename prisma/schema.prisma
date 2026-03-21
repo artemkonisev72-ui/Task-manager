@@ -14,14 +14,18 @@ enum Role {
 }
 
 model User {
-  id             String          @id @default(uuid())
-  login          String          @unique
-  passwordHash   String
-  role           Role            @default(EXECUTOR)
-  sessions       Session[]
-  logisticsTasks LogisticsTask[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id                  String               @id @default(uuid())
+  login               String               @unique
+  passwordHash        String
+  role                Role                 @default(EXECUTOR)
+  sessions            Session[]
+  
+  assignments         TaskAssignment[]
+  notifications       Notification[]
+  webPushSubscription WebPushSubscription?
+
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 }
 
 
@@ -45,8 +49,50 @@ model LogisticsTask {
   checklist   String?
   amount      Float
 
-  executors User[]
+  assignments TaskAssignment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum AssignmentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model TaskAssignment {
+  id           String           @id @default(uuid())
+  taskId       String
+  userId       String
+  status       AssignmentStatus @default(PENDING)
+  assignedAt   DateTime         @default(now())
+  autoRejectAt DateTime
+
+  task LogisticsTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WebPushSubscription {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
