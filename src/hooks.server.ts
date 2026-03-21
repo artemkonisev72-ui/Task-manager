@@ -1,12 +1,14 @@
 import type { Handle } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import bcrypt from 'bcryptjs';
+import { startDailyPushCron } from '$lib/server/cron';
 
 // Seed admin on first server start
 let seeded = false;
 async function ensureAdmin() {
     if (seeded) return;
     seeded = true;
+    startDailyPushCron(); // Инициализация крона для рассылок
     const existing = await prisma.user.findUnique({ where: { login: 'admin' } });
     if (!existing) {
         const passwordHash = await bcrypt.hash('123456', 10);
