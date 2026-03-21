@@ -1,13 +1,37 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	interface Task {
+		id: string;
+		number: string;
+		date: string | Date;
+		timeStart: string;
+		timeEnd: string;
+		address: string;
+		logistics: string;
+		dealContent: string;
+		comment?: string | null;
+		checklist?: string | null;
+		amount: number;
+		assignmentStatus?: string;
+	}
+
+	interface Executor {
+		id: string;
+		login: string;
+		role: string;
+		logisticsTasks: Task[];
+	}
+
 	let { data, form } = $props();
 
 	// Edit modal state
-	type TaskType = typeof data.executors extends Array<infer E> ? (E extends { logisticsTasks: Array<infer T> } ? T : never) : never;
-	let editingTask = $state<TaskType | null>(null);
+	let editingTask = $state<Task | null>(null);
 	let editExecutorIds = $state<string[]>([]);
 
-	function openEdit(task: any, currentExecutorIds: string[]) {
+	let executors = $derived((data.executors as any as Executor[]) || []);
+	let tasks = $derived((data.tasks as any as Task[]) || []);
+
+	function openEdit(task: Task, currentExecutorIds: string[]) {
 		editingTask = task;
 		editExecutorIds = [...currentExecutorIds];
 	}
@@ -51,8 +75,8 @@
 	{#if data.isManager}
 		<!-- Админ/Менеджер вид -->
 		<div class="space-y-4">
-			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Исполнители ({data.executors?.length || 0})</h2>
-			{#each data.executors || [] as exec}
+			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Исполнители ({executors.length})</h2>
+			{#each executors as exec}
 				<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
 					<button onclick={() => toggleExecutor(exec.id)} class="w-full px-6 py-5 flex items-center justify-between bg-gray-50 dark:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-left focus:outline-none">
 						<div class="flex items-center gap-3">
@@ -134,12 +158,12 @@
 	{:else}
 		<!-- Исполнитель вид -->
 		<div class="space-y-4">
-			{#if data.tasks?.length === 0}
+			{#if tasks.length === 0}
 				<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center text-gray-500 dark:text-gray-400">
 					У вас пока нет заявок
 				</div>
 			{/if}
-			{#each data.tasks || [] as task}
+			{#each tasks as task}
 				<div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-gray-800">
 					<button onclick={() => toggleTask(task.id)} class="w-full px-6 py-5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left">
 						<div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
@@ -201,7 +225,7 @@
 			<div class="pt-4 border-t border-gray-100 dark:border-gray-700">
 				<label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Исполнители</label>
 				<div class="space-y-2 max-h-40 overflow-y-auto pr-2">
-					{#each data.executors || [] as exec}
+					{#each executors as exec}
 						<label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-white dark:hover:bg-gray-600 transition-colors">
 							<input type="checkbox" name="executorIds" value={exec.id} checked={editExecutorIds.includes(exec.id)} class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" />
 							<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>

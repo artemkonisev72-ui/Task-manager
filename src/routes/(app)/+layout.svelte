@@ -3,6 +3,33 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { PUBLIC_VAPID_KEY } from '$env/static/public';
 	import { invalidateAll } from '$app/navigation';
+
+	interface NotificationItem {
+		id: string;
+		title: string;
+		message: string;
+		read: boolean;
+		createdAt: Date | string;
+	}
+
+	interface PendingAssignment {
+		id: string;
+		taskId: string;
+		autoRejectAt: Date | string;
+		task: {
+			id: string;
+			number: string;
+			date: Date | string;
+			timeStart: string;
+			timeEnd: string;
+			address: string;
+			logistics: string;
+			dealContent: string;
+			comment?: string | null;
+			checklist?: string | null;
+		}
+	}
+
 	let { data, children }: { data: LayoutData, children: any } = $props();
 
 	let isDark = $state(false);
@@ -13,16 +40,16 @@
 
 	let showNotifications = $state(false);
 	let rejectActionLoading = $state(false);
-	let timerInterval: any;
-	let pollInterval: any;
+	let timerInterval: ReturnType<typeof setInterval> | undefined;
+	let pollInterval: ReturnType<typeof setInterval> | undefined;
 	let now = $state(Date.now());
 
-	let notifications = $state(data.notifications || []);
-	let pendingAssignments = $state(data.pendingAssignments || []);
+	let notifications = $state<NotificationItem[]>([]);
+	let pendingAssignments = $state<PendingAssignment[]>([]);
 
 	$effect(() => {
-		notifications = data.notifications || [];
-		pendingAssignments = data.pendingAssignments || [];
+		notifications = (data as any).notifications || [];
+		pendingAssignments = (data as any).pendingAssignments || [];
 	});
 
 	function urlBase64ToUint8Array(base64String: string) {
@@ -174,8 +201,8 @@
 	}
 	async function toggleNotifications() {
 		showNotifications = !showNotifications;
-		if (showNotifications && notifications.some(n => !n.read)) {
-			notifications = notifications.map(n => ({...n, read: true}));
+		if (showNotifications && notifications.some((n: NotificationItem) => !n.read)) {
+			notifications = notifications.map((n: NotificationItem) => ({...n, read: true}));
 			fetch('/api/notifications/read', { method: 'POST' }).catch(() => {});
 		}
 	}

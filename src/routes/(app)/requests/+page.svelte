@@ -1,27 +1,42 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { enhance } from '$app/forms';
+	interface Task {
+		id: string;
+		number: string;
+		date: string | Date;
+		timeStart: string;
+		timeEnd: string;
+		address: string;
+		logistics: string;
+		dealContent: string;
+		comment?: string | null;
+		checklist?: string | null;
+		amount: number;
+		executors: Array<{ id: string; login: string }>;
+	}
+
 	let { data, form } = $props();
 	
 	let showModal = $state(false);
 
-	let editingTask = $state<any>(null);
+	let editingTask = $state<Task | null>(null);
 	let editExecutorIds = $state<string[]>([]);
 
 	let searchQuery = $state('');
 	
 	let searchResults = $derived(
 		searchQuery.trim().length > 0 
-        ? data.tasks.filter((t: any) => {
-            const q = searchQuery.toLowerCase();
-            return (t.number && t.number.toLowerCase().includes(q)) ||
-                   (t.address && t.address.toLowerCase().includes(q)) ||
-                   (t.comment && t.comment.toLowerCase().includes(q));
-        })
-        : []
+		? (data.tasks as Task[]).filter((t: Task) => {
+			const q = searchQuery.toLowerCase();
+			return (t.number && t.number.toLowerCase().includes(q)) ||
+				   (t.address && t.address.toLowerCase().includes(q)) ||
+				   (t.comment && t.comment.toLowerCase().includes(q));
+		})
+		: []
 	);
 
-	function openEdit(task: any, currentExecutorIds: string[]) {
+	function openEdit(task: Task, currentExecutorIds: string[]) {
 		editingTask = task;
 		editExecutorIds = [...currentExecutorIds];
 	}
@@ -75,7 +90,7 @@
 
 	// Tasks for the selected date
 	let tasksForDate = $derived(
-		data.tasks.filter((t: any) => new Date(t.date).toISOString().split('T')[0] === selectedDate)
+		(data.tasks as Task[]).filter((t: Task) => new Date(t.date).toISOString().split('T')[0] === selectedDate)
 	);
 
 	function hasTasks(iso: string): boolean {
@@ -237,7 +252,7 @@
 	{/if}
 </div>
 
-{#snippet taskCard(task)}
+{#snippet taskCard(task: Task)}
 	<div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
 		<!-- Header -->
 		<button onclick={() => toggleTask(task.id)} class="w-full px-6 py-5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left">
