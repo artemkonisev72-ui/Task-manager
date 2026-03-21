@@ -34,7 +34,7 @@
 </script>
 
 <svelte:head>
-    <title>Задачи логистики - Task Manager</title>
+    <title>Логистика - Logistics Manager</title>
 </svelte:head>
 
 <div class="max-w-6xl mx-auto space-y-8 pb-12">
@@ -63,7 +63,7 @@
 						</div>
 						<div class="flex items-center gap-4">
 							<span class="text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-600">
-								Задач: {exec.logisticsTasks.length}
+								Заявок: {exec.logisticsTasks.length}
 							</span>
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-500 transform transition-transform {expandedExecutor === exec.id ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
 						</div>
@@ -72,7 +72,7 @@
 					{#if expandedExecutor === exec.id}
 						<div class="p-6 space-y-4">
 							{#if exec.logisticsTasks.length === 0}
-								<p class="text-gray-500 dark:text-gray-400 italic text-sm text-center py-4">Нет назначенных задач</p>
+								<p class="text-gray-500 dark:text-gray-400 italic text-sm text-center py-4">Нет назначенных заявок</p>
 							{/if}
 							{#each exec.logisticsTasks as task}
 								<div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
@@ -111,7 +111,7 @@
 													method="POST"
 													action="?/deleteTask"
 													use:enhance
-													onsubmit={(e) => { if (!confirm(`Удалить задачу №${task.number}? Это действие необратимо.`)) e.preventDefault(); }}
+													onsubmit={(e) => { if (!confirm(`Удалить заявку №${task.number}? Это действие необратимо.`)) e.preventDefault(); }}
 												>
 													<input type="hidden" name="taskId" value={task.id} />
 													<button type="submit" class="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-xl transition-colors">
@@ -136,7 +136,7 @@
 		<div class="space-y-4">
 			{#if data.tasks?.length === 0}
 				<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center text-gray-500 dark:text-gray-400">
-					У вас пока нет задач
+					У вас пока нет заявок
 				</div>
 			{/if}
 			{#each data.tasks || [] as task}
@@ -177,7 +177,7 @@
 <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
 	<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
 		<div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 shrink-0">
-			<h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Редактировать задачу #{editingTask.number}</h3>
+			<h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Редактировать заявку #{editingTask.number}</h3>
 			<button onclick={closeEdit} class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" aria-label="Закрыть">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
 			</button>

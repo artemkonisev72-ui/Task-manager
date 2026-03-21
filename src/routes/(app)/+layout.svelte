@@ -65,7 +65,7 @@
 	<!-- Sidebar -->
 	<aside class="w-full md:w-64 bg-white dark:bg-gray-800 border-r border-gray-100 dark:border-gray-700 flex flex-col p-6 shadow-sm z-10 transition-colors duration-200">
 		<div class="mb-10 w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-2xl flex items-center justify-center shadow-md">
-			<span class="font-bold text-2xl tracking-tighter">TM</span>
+			<span class="font-bold text-2xl tracking-tighter">LM</span>
 		</div>
 
 		<nav class="flex-1 space-y-2">

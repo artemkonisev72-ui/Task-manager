@@ -6,7 +6,7 @@
 	<div class="w-full max-w-sm bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
 		<div class="text-center mb-8">
 			<h1 class="text-2xl font-semibold tracking-tight text-gray-900">Создать аккаунт</h1>
-			<p class="text-sm text-gray-500 mt-2">Задача за задачей</p>
+			<p class="text-sm text-gray-500 mt-2">Заявка за заявкой</p>
 		</div>
 
 		<form method="POST" class="space-y-4">

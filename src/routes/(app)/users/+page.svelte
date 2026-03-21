@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-    <title>Пользователи - Task Manager</title>
+    <title>Пользователи - Logistics Manager</title>
 </svelte:head>
 
 <div class="max-w-4xl mx-auto space-y-8">

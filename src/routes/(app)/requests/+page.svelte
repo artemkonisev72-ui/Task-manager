@@ -107,7 +107,7 @@
 </script>
 
 <svelte:head>
-    <title>Заявки - Task Manager</title>
+    <title>Заявки - Logistics Manager</title>
 </svelte:head>
 
 <div class="max-w-6xl mx-auto space-y-6 pb-12">
@@ -126,7 +126,7 @@
 
 	{#if dates.length === 0}
 		<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center text-gray-500 dark:text-gray-400">
-			Нет созданных задач
+			Нет созданных заявок
 		</div>
 	{:else}
 		<!-- Date slider -->
@@ -162,14 +162,14 @@
 		<div class="flex items-center gap-3">
 			<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 capitalize">{formatDateFull(selectedDate)}</h2>
 			<span class="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 rounded-full font-medium">
-				{tasksForDate.length} {tasksForDate.length === 1 ? 'задача' : tasksForDate.length >= 2 && tasksForDate.length <= 4 ? 'задачи' : 'задач'}
+				{tasksForDate.length} {tasksForDate.length === 1 ? 'заявка' : tasksForDate.length >= 2 && tasksForDate.length <= 4 ? 'заявки' : 'заявок'}
 			</span>
 		</div>
 
 		<!-- Tasks -->
 		{#if tasksForDate.length === 0}
 			<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center text-gray-500 dark:text-gray-400">
-				Нет задач на эту дату
+				Нет заявок на эту дату
 			</div>
 		{:else}
 			<div class="space-y-4">

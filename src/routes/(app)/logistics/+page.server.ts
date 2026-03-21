@@ -79,7 +79,7 @@ export const actions: Actions = {
 
 		const data = await request.formData();
 		const taskId = data.get('taskId') as string;
-		if (!taskId) return fail(400, { error: 'ID задачи не указан' });
+		if (!taskId) return fail(400, { error: 'ID заявки не указан' });
 
 		await prisma.logisticsTask.delete({ where: { id: taskId } });
 	},
