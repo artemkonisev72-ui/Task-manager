@@ -8,6 +8,9 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit(),
 		SvelteKitPWA({
+			strategies: 'injectManifest',
+			srcDir: 'src',
+			filename: 'service-worker.js',
 			registerType: 'autoUpdate',
 			devOptions: {
 				enabled: true,

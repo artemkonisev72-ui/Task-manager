@@ -50,7 +50,6 @@
 	async function subscribeToPush() {
 		if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 		try {
-			await navigator.serviceWorker.register('/sw.js');
 			const registration = await navigator.serviceWorker.ready;
 			const subscription = await registration.pushManager.subscribe({
 				userVisibleOnly: true,

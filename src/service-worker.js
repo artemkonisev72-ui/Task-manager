@@ -1,3 +1,8 @@
+import { precacheAndRoute } from 'workbox-precaching';
+
+// Кэшируем системные файлы SvelteKit для работы оффлайн (Внедряется плагином PWA)
+precacheAndRoute(self.__WB_MANIFEST || []);
+
 self.addEventListener('push', function(event) {
     if (!event.data) return;
     
