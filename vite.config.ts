@@ -18,8 +18,8 @@ export default defineConfig({
 				type: 'module'
 			},
 			manifest: {
-				name: 'Logistics Manager PWA',
-				short_name: 'LogisticsManager',
+				name: 'Logistics Manager',
+				short_name: 'LM',
 				description: 'A minimalist logistics manager progressive web app',
 				theme_color: '#000000',
 				background_color: '#fafafa',
