@@ -305,6 +305,11 @@
 			</a>
 			<a href="/chat" class="px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex justify-between items-center">
 				<span>Чат</span>
+				{#if data.unreadMessagesCount > 0}
+					<span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[18px] text-center">
+						{data.unreadMessagesCount}
+					</span>
+				{/if}
 			</a>
 			<a href="/users" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
 				Пользователи

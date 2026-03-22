@@ -29,9 +29,14 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		});
 	}
 
+	const unreadMessagesCount = await prisma.message.count({
+		where: { receiverId: locals.user.id, read: false }
+	});
+
 	return {
 		user: locals.user,
 		pendingAssignments,
-		notifications
+		notifications,
+		unreadMessagesCount
 	};
 };
