@@ -30,6 +30,7 @@
 
 	let executors = $derived((data.executors as any as Executor[]) || []);
 	let tasks = $derived((data.tasks as any as Task[]) || []);
+	let unassignedTasks = $derived((data.unassignedTasks as any as Task[]) || []);
 
 	function openEdit(task: Task, currentExecutorIds: string[]) {
 		editingTask = task;
@@ -74,87 +75,56 @@
 
 	{#if data.isManager}
 		<!-- Админ/Менеджер вид -->
-		<div class="space-y-4">
-			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Исполнители ({executors.length})</h2>
-			{#each executors as exec, i}
-				<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-					<button onclick={() => toggleExecutor(exec.id)} class="w-full px-6 py-5 flex items-center justify-between bg-gray-50 dark:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-left focus:outline-none">
-						<div class="flex items-center gap-3">
-							<div class="text-sm font-mono text-gray-400 w-4">{i + 1}</div>
-							<div class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs font-bold text-gray-700 dark:text-gray-300">
-								{exec.login[0].toUpperCase()}
-							</div>
-							<span class="font-semibold text-gray-900 dark:text-gray-100">{exec.login}</span>
-						</div>
-						<div class="flex items-center gap-4">
-							<span class="text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-600">
-								Заявок: {exec.logisticsTasks.length}
-							</span>
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-500 transform transition-transform {expandedExecutor === exec.id ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-						</div>
-					</button>
-
-					{#if expandedExecutor === exec.id}
-						<div class="p-6 space-y-4">
-							{#if exec.logisticsTasks.length === 0}
-								<p class="text-gray-500 dark:text-gray-400 italic text-sm text-center py-4">Нет назначенных заявок</p>
-							{/if}
-							{#each exec.logisticsTasks as task}
-								<div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
-									<button onclick={() => toggleTask(task.id)} class="w-full bg-white dark:bg-gray-800 px-5 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left">
-										<div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
-											<span class="font-bold text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded text-xs">#{task.number}</span>
-											<span class="text-sm font-medium text-gray-800 dark:text-gray-200 line-clamp-1">{task.address}</span>
-											<span class="text-sm text-gray-500 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{task.timeStart} - {task.timeEnd}</span>
-										</div>
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-500 shrink-0 transform transition-transform {expandedTask === task.id ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-									</button>
-									
-									{#if expandedTask === task.id}
-										<div class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 p-5 overflow-x-auto">
-											<table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm table-fixed min-w-[600px]">
-												<tbody>
-													<tr class="border-b border-gray-100 dark:border-gray-700"><th class="w-48 px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Номер</th><td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{task.number}</td></tr>
-													<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Дата</th><td class="px-4 py-3 text-gray-900 dark:text-gray-100">{new Date(task.date).toLocaleDateString('ru-RU')}</td></tr>
-													<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Время</th><td class="px-4 py-3 font-mono text-gray-900 dark:text-gray-100">{task.timeStart} — {task.timeEnd}</td></tr>
-													<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Адрес</th><td class="px-4 py-3 text-gray-900 dark:text-gray-100">{task.address}</td></tr>
-													<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Логистика</th><td class="px-4 py-3 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.logistics}</td></tr>
-													<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Наполнение сделки</th><td class="px-4 py-3 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.dealContent}</td></tr>
-													<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Комментарий</th><td class="px-4 py-3 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.comment || '-'}</td></tr>
-													<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Чек-лист</th><td class="px-4 py-3 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.checklist || '-'}</td></tr>
-													<tr><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Сумма к оплате</th><td class="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">{task.amount} руб.</td></tr>
-												</tbody>
-											</table>
-											<div class="mt-4 flex justify-end gap-3">
-												<button
-													onclick={() => openEdit(task, [exec.id])}
-													class="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl transition-colors"
-												>
-													Редактировать
-												</button>
-												<form
-													method="POST"
-													action="?/deleteTask"
-													use:enhance
-													onsubmit={(e) => { if (!confirm(`Удалить заявку №${task.number}? Это действие необратимо.`)) e.preventDefault(); }}
-												>
-													<input type="hidden" name="taskId" value={task.id} />
-													<button type="submit" class="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-xl transition-colors">
-														Удалить
-													</button>
-												</form>
-											</div>
-										</div>
-									{/if}
-								</div>
-							{/each}
-						</div>
-					{/if}
+		<div class="space-y-8">
+			<!-- Заявки без исполнителей -->
+			{#if unassignedTasks.length > 0}
+				<div class="space-y-4">
+					<h2 class="text-xl font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+						Без исполнителя ({unassignedTasks.length})
+					</h2>
+					<div class="space-y-4 bg-amber-50/50 dark:bg-amber-900/10 p-6 rounded-3xl border border-amber-100 dark:border-amber-900/30">
+						{#each unassignedTasks as task}
+							{@render taskItem(task, [])}
+						{/each}
+					</div>
 				</div>
-			{/each}
+			{/if}
+
+			<div class="space-y-4">
+				<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Исполнители ({executors.length})</h2>
+				{#each executors as exec, i}
+					<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+						<button onclick={() => toggleExecutor(exec.id)} class="w-full px-6 py-5 flex items-center justify-between bg-gray-50 dark:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-left focus:outline-none">
+							<div class="flex items-center gap-3">
+								<div class="text-sm font-mono text-gray-400 w-4">{i + 1}</div>
+								<div class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs font-bold text-gray-700 dark:text-gray-300">
+									{exec.login[0].toUpperCase()}
+								</div>
+								<span class="font-semibold text-gray-900 dark:text-gray-100">{exec.login}</span>
+							</div>
+							<div class="flex items-center gap-4">
+								<span class="text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-600">
+									Заявок: {exec.logisticsTasks.length}
+								</span>
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-500 transform transition-transform {expandedExecutor === exec.id ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+							</div>
+						</button>
+
+						{#if expandedExecutor === exec.id}
+							<div class="p-6 space-y-4">
+								{#if exec.logisticsTasks.length === 0}
+									<p class="text-gray-500 dark:text-gray-400 italic text-sm text-center py-4">Нет назначенных заявок</p>
+								{/if}
+								{#each exec.logisticsTasks as task}
+									{@render taskItem(task, [exec.id])}
+								{/each}
+							</div>
+						{/if}
+					</div>
+				{/each}
+			</div>
 		</div>
-
-
 
 	{:else}
 		<!-- Исполнитель вид -->
@@ -165,37 +135,63 @@
 				</div>
 			{/if}
 			{#each tasks as task}
-				<div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-gray-800">
-					<button onclick={() => toggleTask(task.id)} class="w-full px-6 py-5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left">
-						<div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-							<span class="font-bold text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded text-xs uppercase">#{task.number}</span>
-							<span class="text-base font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">{task.address}</span>
-							<span class="text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">{task.timeStart} &rarr; {task.timeEnd}</span>
-						</div>
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 dark:text-gray-500 shrink-0 transform transition-transform {expandedTask === task.id ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-					</button>
-					{#if expandedTask === task.id}
-						<div class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 p-6 overflow-x-auto">
-							<table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm table-fixed min-w-[600px]">
-								<tbody>
-									<tr class="border-b border-gray-100 dark:border-gray-700"><th class="w-48 px-5 py-4 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Номер</th><td class="px-5 py-4 font-bold text-gray-900 dark:text-gray-100">{task.number}</td></tr>
-									<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-5 py-4 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Дата</th><td class="px-5 py-4 text-gray-900 dark:text-gray-100">{new Date(task.date).toLocaleDateString('ru-RU')}</td></tr>
-									<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-5 py-4 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Время</th><td class="px-5 py-4 font-mono font-bold text-gray-900 dark:text-gray-100">{task.timeStart} — {task.timeEnd}</td></tr>
-									<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-5 py-4 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Адрес</th><td class="px-5 py-4 text-gray-900 dark:text-gray-100">{task.address}</td></tr>
-									<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-5 py-4 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Логистика</th><td class="px-5 py-4 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.logistics}</td></tr>
-									<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-5 py-4 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Наполнение сделки</th><td class="px-5 py-4 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.dealContent}</td></tr>
-									<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-5 py-4 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Комментарий</th><td class="px-5 py-4 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.comment || '-'}</td></tr>
-									<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-5 py-4 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Чек-лист</th><td class="px-5 py-4 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.checklist || '-'}</td></tr>
-									<tr><th class="px-5 py-4 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Сумма к оплате</th><td class="px-5 py-4 font-bold text-green-700 dark:text-green-400">{task.amount} руб.</td></tr>
-								</tbody>
-							</table>
-						</div>
-					{/if}
-				</div>
+				{@render taskItem(task, [data.user.id])}
 			{/each}
 		</div>
 	{/if}
 </div>
+
+{#snippet taskItem(task: Task, currentExecutorIds: string[])}
+	<div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-gray-800">
+		<button onclick={() => toggleTask(task.id)} class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left">
+			<div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+				<span class="font-bold text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded text-xs shrink-0">#{task.number}</span>
+				<span class="text-sm font-medium text-gray-800 dark:text-gray-200 line-clamp-1">{task.address}</span>
+				<span class="text-sm text-gray-500 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded shrink-0">{task.timeStart || '??:??'} - {task.timeEnd || '??:??'}</span>
+			</div>
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-500 shrink-0 transform transition-transform {expandedTask === task.id ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+		</button>
+		
+		{#if expandedTask === task.id}
+			<div class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 p-5 overflow-x-auto">
+				<table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm table-fixed min-w-[600px]">
+					<tbody>
+						<tr class="border-b border-gray-100 dark:border-gray-700"><th class="w-48 px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Номер</th><td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{task.number}</td></tr>
+						<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Дата</th><td class="px-4 py-3 text-gray-900 dark:text-gray-100">{new Date(task.date).toLocaleDateString('ru-RU')}</td></tr>
+						<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Время</th><td class="px-4 py-3 font-mono text-gray-900 dark:text-gray-100">{task.timeStart || '-'} — {task.timeEnd || '-'}</td></tr>
+						<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Адрес</th><td class="px-4 py-3 text-gray-900 dark:text-gray-100">{task.address}</td></tr>
+						<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Логистика</th><td class="px-4 py-3 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.logistics || '-'}</td></tr>
+						<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Наполнение сделки</th><td class="px-4 py-3 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.dealContent || '-'}</td></tr>
+						<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Комментарий</th><td class="px-4 py-3 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.comment || '-'}</td></tr>
+						<tr class="border-b border-gray-100 dark:border-gray-700"><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Чек-лист</th><td class="px-4 py-3 break-words whitespace-pre-wrap text-gray-900 dark:text-gray-100">{task.checklist || '-'}</td></tr>
+						<tr><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Сумма к оплате</th><td class="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">{task.amount} руб.</td></tr>
+					</tbody>
+				</table>
+				{#if data.isManager}
+					<div class="mt-4 flex justify-end gap-3">
+						<button
+							onclick={() => openEdit(task, currentExecutorIds)}
+							class="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl transition-colors"
+						>
+							Редактировать
+						</button>
+						<form
+							method="POST"
+							action="?/deleteTask"
+							use:enhance
+							onsubmit={(e) => { if (!confirm(`Удалить заявку №${task.number}? Это действие необратимо.`)) e.preventDefault(); }}
+						>
+							<input type="hidden" name="taskId" value={task.id} />
+							<button type="submit" class="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-xl transition-colors">
+								Удалить
+							</button>
+						</form>
+					</div>
+				{/if}
+			</div>
+		{/if}
+	</div>
+{/snippet}
 
 <!-- Edit task modal -->
 {#if editingTask}

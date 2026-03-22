@@ -15,7 +15,13 @@ export const load: PageServerLoad = async ({ parent }) => {
 			id: e.id, login: e.login, role: e.role,
 			logisticsTasks: e.assignments.map(a => ({ ...a.task, assignmentStatus: a.status }))
 		}));
-		return { executors, isManager: true };
+
+		const unassignedTasks = await prisma.logisticsTask.findMany({
+			where: { assignments: { none: {} } },
+			orderBy: { date: 'desc' }
+		});
+
+		return { executors, unassignedTasks, isManager: true };
 	} else {
 		// EXECUTOR
 		const tasksRaw = await prisma.logisticsTask.findMany({
@@ -24,7 +30,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 			include: { assignments: { where: { userId: user.id } } }
 		});
 		const tasks = tasksRaw.map(t => ({ ...t, assignmentStatus: t.assignments[0]?.status }));
-		return { tasks, isManager: false };
+		return { tasks, unassignedTasks: [], isManager: false };
 	}
 };
 
@@ -49,8 +55,8 @@ export const actions: Actions = {
 		// executors[] handling
 		const executorIds = data.getAll('executorIds') as string[];
 
-		if (!number || !dateStr || executorIds.length === 0) {
-			return fail(400, { error: 'Номер, дата и хотя бы один исполнитель обязательны' });
+		if (!number || !dateStr) {
+			return fail(400, { error: 'Номер и дата обязательны' });
 		}
 
 		const dateObj = new Date(dateStr);
@@ -112,8 +118,8 @@ export const actions: Actions = {
 		const amountStr = data.get('amount') as string;
 		const executorIds = data.getAll('executorIds') as string[];
 
-		if (!taskId || !number || !dateStr || executorIds.length === 0) {
-			return fail(400, { error: 'ID, номер, дата и хотя бы один исполнитель обязательны' });
+		if (!taskId || !number || !dateStr) {
+			return fail(400, { error: 'ID, номер и дата обязательны' });
 		}
 
 		const dateObj = new Date(dateStr);
