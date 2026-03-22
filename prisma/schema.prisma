@@ -28,6 +28,7 @@ model User {
   
   sentMessages        Message[] @relation("SentMessages")
   receivedMessages    Message[] @relation("ReceivedMessages")
+  documents           Document[]
 
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
@@ -114,4 +115,14 @@ model Message {
   receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@index([senderId, receiverId])
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  name       String
+  path       String
+  uploaderId String
+  createdAt  DateTime @default(now())
+
+  uploader   User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
 }

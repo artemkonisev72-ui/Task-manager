@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const users = await prisma.user.findMany({
 		where: {
-			role: isExecutor ? { in: ['ADMIN', 'MANAGER'] } : 'EXECUTOR'
+			role: isExecutor ? 'MANAGER' : 'EXECUTOR'
 		},
 		select: { id: true, login: true, role: true }
 	});

@@ -332,6 +332,9 @@
 			<a href="/users" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
 				Пользователи
 			</a>
+			<a href="/info" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+				Информация
+			</a>
 		</nav>
 
 		<div class="pt-6 border-t border-gray-100 dark:border-gray-700 mt-auto">

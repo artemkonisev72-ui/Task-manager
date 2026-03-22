@@ -15,6 +15,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
 	if (!partner) throw redirect(303, '/chat');
 
+	// Block executors from chatting with admins
+	if (locals.user.role === 'EXECUTOR' && partner.role === 'ADMIN') {
+		throw redirect(303, '/chat');
+	}
+
 	// Mark all unread messages from partner as read
 	await prisma.message.updateMany({
 		where: { senderId: partnerId, receiverId: locals.user.id, read: false },
