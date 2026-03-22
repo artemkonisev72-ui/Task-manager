@@ -305,8 +305,8 @@
 					{@const myAssignment = task.executors.find(e => e.id === data.user.id)}
 					{#if myAssignment?.paymentText}
 						<div class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-2xl flex items-center justify-between">
-							<span class="text-sm font-medium text-green-800 dark:text-green-300">Оплата Исполнителю</span>
-							<span class="text-lg font-bold text-green-700 dark:text-green-400">Я получу: {myAssignment.paymentText}</span>
+							<span class="text-sm font-medium text-green-800 dark:text-green-300">Оплата сотруднику</span>
+							<span class="text-lg font-bold text-green-700 dark:text-green-400">{myAssignment.paymentText}</span>
 						</div>
 					{/if}
 				{/if}
@@ -318,6 +318,17 @@
 						>
 							Редактировать
 						</button>
+						<form
+							method="POST"
+							action="/logistics?/deleteTask"
+							use:enhance
+							onsubmit={(e) => { if (!confirm(`Удалить заявку №${task.number}? Это действие необратимо.`)) e.preventDefault(); }}
+						>
+							<input type="hidden" name="taskId" value={task.id} />
+							<button type="submit" class="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-xl transition-colors">
+								Удалить
+							</button>
+						</form>
 					</div>
 				{/if}
 			</div>
@@ -370,7 +381,15 @@
 										}}
 										class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" 
 									/>
+								<div class="flex items-center gap-2">
+									{#if exec.level === 'TOP'}
+										<span class="text-[10px] font-bold text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/60 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-700">ТОП</span>
+									{:else if exec.level === 'PRO'}
+										<span class="text-[10px] font-bold text-blue-700 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/60 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-700">ПРО</span>
+									{/if}
 									<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
+									<span class="text-xs text-gray-500 dark:text-gray-400 ml-1">({exec.activeTasksCount} заявок)</span>
+								</div>
 								</label>
 								{#if createExecutorIds.includes(exec.id)}
 									<input 
@@ -440,7 +459,15 @@
 									}}
 									class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" 
 								/>
-								<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
+								<div class="flex items-center gap-2">
+									{#if exec.level === 'TOP'}
+										<span class="text-[10px] font-bold text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/60 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-700">ТОП</span>
+									{:else if exec.level === 'PRO'}
+										<span class="text-[10px] font-bold text-blue-700 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/60 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-700">ПРО</span>
+									{/if}
+									<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
+									<span class="text-xs text-gray-500 dark:text-gray-400 ml-1">({exec.activeTasksCount} заявок)</span>
+								</div>
 							</label>
 							{#if editExecutorIds.includes(exec.id)}
 								<input 

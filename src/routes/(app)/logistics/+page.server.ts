@@ -10,14 +10,27 @@ export const load: PageServerLoad = async ({ parent }) => {
 		throw redirect(303, '/requests');
 	}
 
+	// @ts-ignore - level and _count are in the schema but types are not generated locally yet
 	const executorsRaw = await prisma.user.findMany({
 		where: { role: 'EXECUTOR' },
-		include: { assignments: { include: { task: true }, orderBy: { task: { date: 'desc' } } } }
+		include: { 
+			assignments: { include: { task: true }, orderBy: { task: { date: 'desc' } } },
+			_count: { select: { assignments: { where: { status: { in: ['PENDING', 'ACCEPTED'] } } } } }
+		}
 	});
-	const executors = executorsRaw.map(e => ({
-		id: e.id, login: e.login, role: e.role,
-		logisticsTasks: e.assignments.map(a => ({ ...a.task, assignmentStatus: a.status, paymentText: a.paymentText }))
-	}));
+
+	const levelWeight: Record<string, number> = { TOP: 3, PRO: 2, BEGINNER: 1 };
+
+	const executors = executorsRaw.map((e: any) => ({
+		id: e.id, login: e.login, role: e.role, level: e.level,
+		activeTasksCount: e._count?.assignments || 0,
+		logisticsTasks: e.assignments.map((a: any) => ({ ...a.task, assignmentStatus: a.status, paymentText: a.paymentText }))
+	})).sort((a: any, b: any) => {
+		if (levelWeight[a.level] !== levelWeight[b.level]) {
+			return levelWeight[b.level] - levelWeight[a.level];
+		}
+		return a.activeTasksCount - b.activeTasksCount;
+	});
 
 	const unassignedTasks = await prisma.logisticsTask.findMany({
 		where: { assignments: { none: {} } },
@@ -169,6 +182,25 @@ export const actions: Actions = {
 		// Push to newly added executors
 		toAdd.forEach(executorId => {
 			sendPushNotification(executorId, 'Новая заявка', `Вам назначена заявка №${number}`);
+		});
+	},
+	updateExecutorLevel: async ({ request, locals }) => {
+		if (locals.user?.role !== 'ADMIN' && locals.user?.role !== 'MANAGER') {
+			return fail(403, { error: 'Недостаточно прав' });
+		}
+		
+		const data = await request.formData();
+		const userId = data.get('userId') as string;
+		const level = data.get('level') as any;
+
+		if (!userId || !level) {
+			return fail(400, { error: 'Неверные данные' });
+		}
+
+		// @ts-ignore
+		await prisma.user.update({
+			where: { id: userId },
+			data: { level }
 		});
 	}
 };

@@ -20,6 +20,8 @@
 		id: string;
 		login: string;
 		role: string;
+		level: string;
+		activeTasksCount: number;
 		logisticsTasks: Task[];
 	}
 
@@ -108,21 +110,36 @@
 				<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Исполнители ({executors.length})</h2>
 				{#each executors as exec, i}
 					<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-						<button onclick={() => toggleExecutor(exec.id)} class="w-full px-6 py-5 flex items-center justify-between bg-gray-50 dark:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-left focus:outline-none">
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<div aria-expanded={expandedExecutor === exec.id} role="button" tabindex="0" onclick={() => toggleExecutor(exec.id)} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleExecutor(exec.id); }} class="w-full px-6 py-5 flex items-center justify-between bg-gray-50 dark:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-left focus:outline-none cursor-pointer">
 							<div class="flex items-center gap-3">
 								<div class="text-sm font-mono text-gray-400 w-4">{i + 1}</div>
 								<div class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs font-bold text-gray-700 dark:text-gray-300">
 									{exec.login[0].toUpperCase()}
 								</div>
 								<span class="font-semibold text-gray-900 dark:text-gray-100">{exec.login}</span>
+
+								<form method="POST" action="?/updateExecutorLevel" use:enhance onclick={(e) => e.stopPropagation()} class="ml-2 relative">
+									<input type="hidden" name="userId" value={exec.id} />
+									<select name="level" onchange={(e) => e.currentTarget.form?.requestSubmit()} class="appearance-none text-xs font-bold rounded-lg pl-3 pr-7 py-1.5 border hover:border-black dark:hover:border-white transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-black dark:focus:ring-white 
+										{exec.level === 'TOP' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/40 dark:border-amber-700 dark:text-amber-400' :
+										 exec.level === 'PRO' ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-700 dark:text-blue-400' :
+										 'bg-gray-50 border-gray-200 text-gray-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400'}"
+									>
+										<option value="TOP" selected={exec.level === 'TOP'}>★ ТОП</option>
+										<option value="PRO" selected={exec.level === 'PRO'}>● ПРО</option>
+										<option value="BEGINNER" selected={exec.level === 'BEGINNER'}>НОВИЧОК</option>
+									</select>
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+								</form>
 							</div>
 							<div class="flex items-center gap-4">
-								<span class="text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-600">
-									Заявок: {exec.logisticsTasks.length}
+								<span class="text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-600" title="Активные заявки">
+									Заявок: {exec.activeTasksCount}
 								</span>
 								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-500 transform transition-transform {expandedExecutor === exec.id ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
 							</div>
-						</button>
+						</div>
 
 						{#if expandedExecutor === exec.id}
 							<div class="p-6 space-y-4">
@@ -252,7 +269,15 @@
 									}}
 									class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" 
 								/>
-								<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
+								<div class="flex items-center gap-2">
+									{#if exec.level === 'TOP'}
+										<span class="text-[10px] font-bold text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/60 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-700">ТОП</span>
+									{:else if exec.level === 'PRO'}
+										<span class="text-[10px] font-bold text-blue-700 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/60 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-700">ПРО</span>
+									{/if}
+									<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
+									<span class="text-xs text-gray-500 dark:text-gray-400 ml-1">({exec.activeTasksCount} заявок)</span>
+								</div>
 							</label>
 							{#if editExecutorIds.includes(exec.id)}
 								<input 

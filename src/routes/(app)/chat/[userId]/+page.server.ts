@@ -5,7 +5,7 @@ import prisma from '$lib/server/prisma';
 export const load: PageServerLoad = async ({ locals, params }) => {
 	if (!locals.user) throw redirect(303, '/login');
 	if (locals.user.role === 'ADMIN') throw redirect(303, '/requests');
-	
+
 	const partnerId = params.userId;
 	if (locals.user.id === partnerId) throw redirect(303, '/chat');
 
@@ -38,7 +38,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		take: 50
 	});
 
-    messages.reverse(); // chronological
+	messages.reverse(); // chronological
 
 	return { partner, messages };
 };
@@ -67,11 +67,11 @@ export const actions: Actions = {
 
 		// Trigger push notification if manager/admin sends to executor
 		if (
-			recipient?.role === 'EXECUTOR' && 
+			recipient?.role === 'EXECUTOR' &&
 			(locals.user.role === 'MANAGER' || locals.user.role === 'ADMIN')
 		) {
 			const body = content.length > 50 ? content.substring(0, 50) + '...' : content;
-			await sendPushNotification(params.userId, 'Новое сообщение от логиста', body);
+			await sendPushNotification(params.userId, 'Новое сообщение', body);
 		}
 	}
 };

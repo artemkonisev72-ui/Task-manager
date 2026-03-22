@@ -13,11 +13,18 @@ enum Role {
   EXECUTOR
 }
 
+enum ExecutorLevel {
+  BEGINNER
+  PRO
+  TOP
+}
+
 model User {
   id                  String               @id @default(uuid())
   login               String               @unique
   passwordHash        String
   role                Role                 @default(EXECUTOR)
+  level               ExecutorLevel        @default(BEGINNER)
   phone               String?
   email               String?
   sessions            Session[]

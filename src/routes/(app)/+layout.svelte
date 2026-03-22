@@ -463,8 +463,8 @@
 					{#if task.checklist}<div class="md:col-span-2"><p class="text-gray-500 dark:text-gray-400 font-semibold mb-1">Чек-лист:</p><p class="bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 wrap-break-word whitespace-pre-wrap">{task.checklist}</p></div>{/if}
 					{#if currentAssignment.paymentText}
 						<div class="md:col-span-2 mt-2 p-4 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-2xl flex items-center justify-between">
-							<span class="text-sm font-medium text-green-800 dark:text-green-300">Оплата Исполнителю</span>
-							<span class="text-lg font-black text-green-700 dark:text-green-400">Я получу: {currentAssignment.paymentText}</span>
+							<span class="text-sm font-medium text-green-800 dark:text-green-300">Оплата сотруднику</span>
+							<span class="text-lg font-black text-green-700 dark:text-green-400">{currentAssignment.paymentText}</span>
 						</div>
 					{/if}
 				</div>
