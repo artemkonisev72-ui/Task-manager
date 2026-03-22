@@ -40,6 +40,7 @@
 	let changingPassword = $state(false);
 
 	let profilePhone = $state('');
+	let profileEmail = $state('');
 	let savingProfile = $state(false);
 	let profileSuccess = $state(false);
 
@@ -181,6 +182,7 @@
 
 	function openProfile() {
 		profilePhone = data.user.phone || '';
+		profileEmail = data.user.email || '';
 		profileSuccess = false;
 		showProfileModal = true;
 	}
@@ -193,7 +195,10 @@
 			const res = await fetch('/api/profile', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ phone: profilePhone.trim() })
+				body: JSON.stringify({ 
+					phone: profilePhone.trim(),
+					email: profileEmail.trim()
+				})
 			});
 			const result = await res.json();
 			if (res.ok && result.success) {
@@ -384,6 +389,10 @@
 			<div>
 				<label for="phone" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Номер телефона</label>
 				<input id="phone" name="phone" type="tel" bind:value={profilePhone} placeholder="+7 (999) 000-00-00" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" />
+			</div>
+			<div>
+				<label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Электронная почта</label>
+				<input id="email" name="email" type="email" bind:value={profileEmail} placeholder="example@mail.com" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" />
 			</div>
 			{#if profileSuccess}<p class="text-green-600 dark:text-green-400 text-sm font-medium">Профиль успешно сохранён!</p>{/if}
 			<button type="submit" disabled={savingProfile} class="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-xl font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50">

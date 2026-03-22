@@ -31,7 +31,7 @@
 						<th class="px-6 py-4 w-12">#</th>
 						<th class="px-6 py-4">Логин</th>
 						<th class="px-6 py-4">Дата регистрации</th>
-						<th class="px-6 py-4">Телефон</th>
+						<th class="px-6 py-4">Телефон / Email</th>
 						<th class="px-6 py-4">Текущая роль</th>
 						{#if data.user.role !== 'EXECUTOR'}
 						<th class="px-6 py-4 text-right">Действия</th>
@@ -55,8 +55,9 @@
 							<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
 								{new Date(u.createdAt).toLocaleDateString('ru-RU')}
 							</td>
-							<td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-gray-200">
-								{u.phone || '—'}
+							<td class="px-6 py-4 text-sm">
+								<div class="text-gray-800 dark:text-gray-200 font-medium">{u.phone || '—'}</div>
+								<div class="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[150px]">{u.email || '—'}</div>
 							</td>
 							<td class="px-6 py-4">
 								<span class="inline-flex items-center px-2.5 py-1 text-xs font-medium

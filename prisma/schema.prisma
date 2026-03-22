@@ -19,6 +19,7 @@ model User {
   passwordHash        String
   role                Role                 @default(EXECUTOR)
   phone               String?
+  email               String?
   sessions            Session[]
   
   assignments         TaskAssignment[]

@@ -8,11 +8,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
-		const { phone } = await request.json();
+		const { phone, email } = await request.json();
 
 		await prisma.user.update({
 			where: { id: locals.user.id },
-			data: { phone: phone || null }
+			data: { 
+				phone: phone || null,
+				email: email || null
+			}
 		});
 
 		return json({ success: true });

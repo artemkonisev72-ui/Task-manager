@@ -7,7 +7,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 	const { user } = await parent();
 	const users = await prisma.user.findMany({
 		orderBy: { createdAt: 'desc' },
-		select: { id: true, login: true, role: true, phone: true, createdAt: true }
+		select: { id: true, login: true, role: true, phone: true, email: true, createdAt: true }
 	});
 
 	return { users };
