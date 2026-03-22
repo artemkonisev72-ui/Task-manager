@@ -82,8 +82,7 @@ export const actions: Actions = {
 
 		// Trigger notifications asynchronously
 		executorIds.forEach(executorId => {
-			const pText = data.get(`payment_${executorId}`) as string || '';
-			sendPushNotification(executorId, 'Новая заявка', `Вам назначена заявка №${number}. Я получу: ${pText}`);
+			sendPushNotification(executorId, 'Новая заявка', `Вам назначена заявка №${number}`);
 		});
 	},
 	deleteTask: async ({ request, locals }) => {
@@ -140,7 +139,7 @@ export const actions: Actions = {
 				await prisma.taskAssignment.create({
 					data: { taskId, userId, autoRejectAt, paymentText: pText }
 				});
-				sendPushNotification(userId, 'Новая заявка', `Вам назначена заявка №${number}. Я получу: ${pText}`);
+				sendPushNotification(userId, 'Новая заявка', `Вам назначена заявка №${number}`);
 			}
 		}
 		for (const userId of toUpdate) {
