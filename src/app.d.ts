@@ -5,6 +5,7 @@ declare global {
 				id: string;
 				login: string;
 				role: string;
+				phone?: string | null;
 			} | null;
 		}
 	}

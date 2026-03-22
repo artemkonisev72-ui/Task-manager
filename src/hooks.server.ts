@@ -38,7 +38,8 @@ export const handle: Handle = async ({ event, resolve }) => {
         event.locals.user = {
             id: session.user.id,
             login: session.user.login,
-            role: session.user.role
+            role: session.user.role,
+            phone: session.user.phone
         };
     } else {
         event.locals.user = null;

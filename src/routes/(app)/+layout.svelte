@@ -34,9 +34,14 @@
 
 	let isDark = $state(false);
 	let showPasswordModal = $state(false);
+	let showProfileModal = $state(false);
 	let pwError = $state('');
 	let pwSuccess = $state(false);
 	let changingPassword = $state(false);
+
+	let profilePhone = $state('');
+	let savingProfile = $state(false);
+	let profileSuccess = $state(false);
 
 	let showNotifications = $state(false);
 	let rejectActionLoading = $state(false);
@@ -174,6 +179,37 @@
 		}
 	}
 
+	function openProfile() {
+		profilePhone = data.user.phone || '';
+		profileSuccess = false;
+		showProfileModal = true;
+	}
+
+	async function handleProfileSave(e: SubmitEvent) {
+		e.preventDefault();
+		savingProfile = true;
+		profileSuccess = false;
+		try {
+			const res = await fetch('/api/profile', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ phone: profilePhone.trim() })
+			});
+			const result = await res.json();
+			if (res.ok && result.success) {
+				profileSuccess = true;
+				await invalidateAll(); // Refresh locals.user
+				setTimeout(() => { showProfileModal = false; profileSuccess = false; }, 1500);
+			} else {
+				alert(result.error || 'Произошла ошибка');
+			}
+		} catch {
+			alert('Ошибка связи с сервером');
+		} finally {
+			savingProfile = false;
+		}
+	}
+
 	async function respondToAssignment(taskId: string, action: 'ACCEPT' | 'REJECT') {
 		if (!confirm('Вы уверены?')) return;
 		rejectActionLoading = true;
@@ -262,11 +298,9 @@
 			<a href="/requests" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
 				Заявки
 			</a>
-			{#if data.user.role === 'ADMIN' || data.user.role === 'MANAGER'}
 			<a href="/users" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
 				Пользователи
 			</a>
-			{/if}
 		</nav>
 
 		<div class="pt-6 border-t border-gray-100 dark:border-gray-700 mt-auto">
@@ -294,6 +328,7 @@
 						Тёмная тема
 					{/if}
 				</button>
+				<button onclick={openProfile} class="w-full py-2.5 text-sm text-center font-medium bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600">Профиль</button>
 				<button onclick={() => { showPasswordModal = true; pwError = ''; pwSuccess = false; }} class="w-full py-2.5 text-sm text-center font-medium bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600">Сменить пароль</button>
 				<form method="POST" action="/logout">
 					<button class="w-full py-2.5 text-sm text-center font-medium bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors shadow-sm">Выйти</button>
@@ -330,6 +365,29 @@
 			{#if pwSuccess}<p class="text-green-600 dark:text-green-400 text-sm font-medium">Пароль успешно изменён!</p>{/if}
 			<button type="submit" disabled={changingPassword} class="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-xl font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50">
 				{changingPassword ? 'Сохранение...' : 'Сменить'}
+			</button>
+		</form>
+	</div>
+</div>
+{/if}
+
+{#if showProfileModal}
+<div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+	<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl w-full max-w-sm overflow-hidden">
+		<div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
+			<h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Профиль</h3>
+			<button onclick={() => showProfileModal = false} class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" aria-label="Закрыть">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+			</button>
+		</div>
+		<form onsubmit={handleProfileSave} class="p-6 space-y-4">
+			<div>
+				<label for="phone" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Номер телефона</label>
+				<input id="phone" name="phone" type="tel" bind:value={profilePhone} placeholder="+7 (999) 000-00-00" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" />
+			</div>
+			{#if profileSuccess}<p class="text-green-600 dark:text-green-400 text-sm font-medium">Профиль успешно сохранён!</p>{/if}
+			<button type="submit" disabled={savingProfile} class="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-xl font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50">
+				{savingProfile ? 'Сохранение...' : 'Сохранить'}
 			</button>
 		</form>
 	</div>

@@ -18,6 +18,7 @@ model User {
   login               String               @unique
   passwordHash        String
   role                Role                 @default(EXECUTOR)
+  phone               String?
   sessions            Session[]
   
   assignments         TaskAssignment[]

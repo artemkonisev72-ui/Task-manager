@@ -5,13 +5,9 @@ import bcrypt from 'bcryptjs';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { user } = await parent();
-	if (user.role !== 'ADMIN' && user.role !== 'MANAGER') {
-		throw redirect(303, '/logistics');
-	}
-
 	const users = await prisma.user.findMany({
 		orderBy: { createdAt: 'desc' },
-		select: { id: true, login: true, role: true, createdAt: true }
+		select: { id: true, login: true, role: true, phone: true, createdAt: true }
 	});
 
 	return { users };

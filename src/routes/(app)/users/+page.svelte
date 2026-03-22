@@ -12,9 +12,11 @@
 <div class="max-w-4xl mx-auto space-y-8">
 	<div class="flex items-center justify-between">
 		<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Управление пользователями</h1>
+		{#if data.user.role !== 'EXECUTOR'}
 		<button onclick={() => showCreateModal = true} class="bg-black dark:bg-white text-white dark:text-black px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm">
 			+ Новый пользователь
 		</button>
+		{/if}
 	</div>
 
 	{#if form?.error}
@@ -29,8 +31,11 @@
 						<th class="px-6 py-4 w-12">#</th>
 						<th class="px-6 py-4">Логин</th>
 						<th class="px-6 py-4">Дата регистрации</th>
+						<th class="px-6 py-4">Телефон</th>
 						<th class="px-6 py-4">Текущая роль</th>
+						{#if data.user.role !== 'EXECUTOR'}
 						<th class="px-6 py-4 text-right">Действия</th>
+						{/if}
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-50 dark:divide-gray-700">
@@ -50,6 +55,9 @@
 							<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
 								{new Date(u.createdAt).toLocaleDateString('ru-RU')}
 							</td>
+							<td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-gray-200">
+								{u.phone || '—'}
+							</td>
 							<td class="px-6 py-4">
 								<span class="inline-flex items-center px-2.5 py-1 text-xs font-medium
 									{u.role === 'ADMIN' ? 'text-black dark:text-white' :
@@ -57,6 +65,7 @@
 									{u.role === 'ADMIN' ? 'Администратор' : u.role === 'MANAGER' ? 'Менеджер' : 'Исполнитель'}
 								</span>
 							</td>
+							{#if data.user.role !== 'EXECUTOR'}
 							<td class="px-6 py-4 text-right">
 								{#if u.id !== data.user.id && u.role !== 'ADMIN' && data.user.role === 'ADMIN'}
 									<form method="POST" action="?/toggleRole" use:enhance class="inline-block">
@@ -81,6 +90,7 @@
 									<span class="text-sm text-gray-400 dark:text-gray-500 italic">Полный доступ</span>
 								{/if}
 							</td>
+							{/if}
 						</tr>
 					{/each}
 				</tbody>
