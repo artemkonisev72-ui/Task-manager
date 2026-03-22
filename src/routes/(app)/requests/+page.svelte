@@ -13,7 +13,7 @@
 		comment?: string | null;
 		checklist?: string | null;
 		amount: number;
-		executors: Array<{ id: string; login: string }>;
+		executors: Array<{ id: string; login: string, status?: string, paymentText?: string }>;
 	}
 
 	let { data, form } = $props();
@@ -22,6 +22,10 @@
 
 	let editingTask = $state<Task | null>(null);
 	let editExecutorIds = $state<string[]>([]);
+	let editPayments = $state<Record<string, string>>({});
+	
+	let createExecutorIds = $state<string[]>([]);
+	let createPayments = $state<Record<string, string>>({});
 
 	let searchQuery = $state('');
 	
@@ -39,10 +43,15 @@
 	function openEdit(task: Task, currentExecutorIds: string[]) {
 		editingTask = task;
 		editExecutorIds = [...currentExecutorIds];
+		editPayments = {};
+		task.executors.forEach(e => {
+			if (e.paymentText) editPayments[e.id] = e.paymentText;
+		});
 	}
 	function closeEdit() {
 		editingTask = null;
 		editExecutorIds = [];
+		editPayments = {};
 	}
 
 	function formatDateForInput(date: Date | string) {
@@ -290,6 +299,17 @@
 						<tr><th class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300">Сумма к оплате</th><td class="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">{task.amount} руб.</td></tr>
 					</tbody>
 				</table>
+
+				<!-- Payment info for the current user if they are an executor -->
+				{#if !data.isManager}
+					{@const myAssignment = task.executors.find(e => e.id === data.user.id)}
+					{#if myAssignment?.paymentText}
+						<div class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-2xl flex items-center justify-between">
+							<span class="text-sm font-medium text-green-800 dark:text-green-300">Оплата Исполнителю</span>
+							<span class="text-lg font-bold text-green-700 dark:text-green-400">Я получу: {myAssignment.paymentText}</span>
+						</div>
+					{/if}
+				{/if}
 				{#if data.isManager}
 					<div class="mt-4 flex justify-end gap-3">
 						<button
@@ -331,13 +351,38 @@
 				</div>
 				<div><label for="c-amount" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Сумма к оплате</label><input id="c-amount" type="number" step="0.01" name="amount" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" placeholder="1000.50" /></div>
 				<div class="pt-4 border-t border-gray-100 dark:border-gray-700">
-					<label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Назначить исполнителей</label>
-					<div class="space-y-2 max-h-40 overflow-y-auto pr-2">
+					<label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Назначить исполнителей (с указанием оплаты)</label>
+					<div class="space-y-3 max-h-60 overflow-y-auto pr-2">
 						{#each data.executors || [] as exec}
-							<label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-white dark:hover:bg-gray-600 transition-colors">
-								<input type="checkbox" name="executorIds" value={exec.id} class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" />
-								<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
-							</label>
+							<div class="space-y-2 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl">
+								<label class="flex items-center gap-3 cursor-pointer">
+									<input 
+										type="checkbox" 
+										name="executorIds" 
+										value={exec.id} 
+										checked={createExecutorIds.includes(exec.id)}
+										onchange={(e) => {
+											if (e.currentTarget.checked) {
+												createExecutorIds.push(exec.id);
+											} else {
+												createExecutorIds = createExecutorIds.filter(id => id !== exec.id);
+											}
+										}}
+										class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" 
+									/>
+									<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
+								</label>
+								{#if createExecutorIds.includes(exec.id)}
+									<input 
+										type="text" 
+										name="payment_{exec.id}" 
+										placeholder="Оплата для {exec.login} (обязательно)"
+										required
+										bind:value={createPayments[exec.id]}
+										class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all shadow-sm"
+									/>
+								{/if}
+							</div>
 						{/each}
 					</div>
 				</div>
@@ -376,13 +421,38 @@
 			</div>
 			<div><label for="e-amount" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Сумма к оплате</label><input id="e-amount" type="number" step="0.01" name="amount" value={editingTask.amount} class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" /></div>
 			<div class="pt-4 border-t border-gray-100 dark:border-gray-700">
-				<label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Исполнители</label>
-				<div class="space-y-2 max-h-40 overflow-y-auto pr-2">
+				<label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Исполнители (с указанием оплаты)</label>
+				<div class="space-y-3 max-h-60 overflow-y-auto pr-2">
 					{#each data.executors || [] as exec}
-						<label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-white dark:hover:bg-gray-600 transition-colors">
-							<input type="checkbox" name="executorIds" value={exec.id} checked={editExecutorIds.includes(exec.id)} class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" />
-							<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
-						</label>
+						<div class="space-y-2 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl">
+							<label class="flex items-center gap-3 cursor-pointer">
+								<input 
+									type="checkbox" 
+									name="executorIds" 
+									value={exec.id} 
+									checked={editExecutorIds.includes(exec.id)}
+									onchange={(e) => {
+										if (e.currentTarget.checked) {
+											editExecutorIds.push(exec.id);
+										} else {
+											editExecutorIds = editExecutorIds.filter(id => id !== exec.id);
+										}
+									}}
+									class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" 
+								/>
+								<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
+							</label>
+							{#if editExecutorIds.includes(exec.id)}
+								<input 
+									type="text" 
+									name="payment_{exec.id}" 
+									placeholder="Оплата для {exec.login} (обязательно)"
+									required
+									bind:value={editPayments[exec.id]}
+									class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all shadow-sm"
+								/>
+							{/if}
+						</div>
 					{/each}
 				</div>
 			</div>

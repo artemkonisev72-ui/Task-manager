@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 
 	const tasks = tasksRaw.map((t: any) => ({
 		...t,
-		executors: t.assignments.map((a: any) => ({ ...a.user, status: a.status }))
+		executors: t.assignments.map((a: any) => ({ ...a.user, status: a.status, paymentText: a.paymentText }))
 	}));
 
 	let executors: any[] = [];

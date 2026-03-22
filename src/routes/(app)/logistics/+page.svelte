@@ -13,6 +13,7 @@
 		checklist?: string | null;
 		amount: number;
 		assignmentStatus?: string;
+		paymentText?: string;
 	}
 
 	interface Executor {
@@ -27,6 +28,7 @@
 	// Edit modal state
 	let editingTask = $state<Task | null>(null);
 	let editExecutorIds = $state<string[]>([]);
+	let editPayments = $state<Record<string, string>>({});
 
 	let executors = $derived((data.executors as any as Executor[]) || []);
 	let tasks = $derived((data.tasks as any as Task[]) || []);
@@ -35,10 +37,21 @@
 	function openEdit(task: Task, currentExecutorIds: string[]) {
 		editingTask = task;
 		editExecutorIds = [...currentExecutorIds];
+		editPayments = {};
+		// We need to find the paymentText for each executor assigned to this task
+		// In logistics page, task is inside exec.logisticsTasks, so task.paymentText is available
+		if ((task as any).paymentText !== undefined) {
+			// This is a bit tricky since one task object here corresponds to one assignment
+			// If we are editing from an executor's list, we populate for that executor
+			for (const eid of currentExecutorIds) {
+				editPayments[eid] = (task as any).paymentText || '';
+			}
+		}
 	}
 	function closeEdit() {
 		editingTask = null;
 		editExecutorIds = [];
+		editPayments = {};
 	}
 
 	// accordion state
@@ -220,13 +233,38 @@
 			</div>
 			<div><label for="e-amount" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Сумма к оплате</label><input id="e-amount" type="number" step="0.01" name="amount" required value={editingTask.amount} class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 focus:bg-white dark:focus:bg-gray-600 focus:border-black dark:focus:border-gray-400 outline-none transition-colors" /></div>
 			<div class="pt-4 border-t border-gray-100 dark:border-gray-700">
-				<label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Исполнители</label>
-				<div class="space-y-2 max-h-40 overflow-y-auto pr-2">
+				<label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Исполнители (с указанием оплаты)</label>
+				<div class="space-y-3 max-h-60 overflow-y-auto pr-2">
 					{#each executors as exec}
-						<label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-white dark:hover:bg-gray-600 transition-colors">
-							<input type="checkbox" name="executorIds" value={exec.id} checked={editExecutorIds.includes(exec.id)} class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" />
-							<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
-						</label>
+						<div class="space-y-2 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl">
+							<label class="flex items-center gap-3 cursor-pointer">
+								<input 
+									type="checkbox" 
+									name="executorIds" 
+									value={exec.id} 
+									checked={editExecutorIds.includes(exec.id)} 
+									onchange={(e) => {
+										if (e.currentTarget.checked) {
+											editExecutorIds.push(exec.id);
+										} else {
+											editExecutorIds = editExecutorIds.filter(id => id !== exec.id);
+										}
+									}}
+									class="w-5 h-5 rounded border-gray-300 dark:border-gray-500 text-black focus:ring-black" 
+								/>
+								<span class="font-medium text-gray-800 dark:text-gray-200">{exec.login}</span>
+							</label>
+							{#if editExecutorIds.includes(exec.id)}
+								<input 
+									type="text" 
+									name="payment_{exec.id}" 
+									placeholder="Оплата для {exec.login} (обязательно)"
+									required
+									bind:value={editPayments[exec.id]}
+									class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all shadow-sm"
+								/>
+							{/if}
+						</div>
 					{/each}
 				</div>
 			</div>

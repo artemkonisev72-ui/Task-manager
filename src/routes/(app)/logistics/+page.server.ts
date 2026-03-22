@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 	});
 	const executors = executorsRaw.map(e => ({
 		id: e.id, login: e.login, role: e.role,
-		logisticsTasks: e.assignments.map(a => ({ ...a.task, assignmentStatus: a.status }))
+		logisticsTasks: e.assignments.map(a => ({ ...a.task, assignmentStatus: a.status, paymentText: a.paymentText }))
 	}));
 
 	const unassignedTasks = await prisma.logisticsTask.findMany({
@@ -71,14 +71,19 @@ export const actions: Actions = {
 				checklist,
 				amount: amountStr ? parseFloat(amountStr) : 0,
 				assignments: {
-					create: executorIds.map(id => ({ userId: id, autoRejectAt }))
+					create: executorIds.map(id => ({ 
+						userId: id, 
+						autoRejectAt, 
+						paymentText: data.get(`payment_${id}`) as string || '' 
+					}))
 				}
 			}
 		});
 
 		// Trigger notifications asynchronously
 		executorIds.forEach(executorId => {
-			sendPushNotification(executorId, 'Новая заявка', `Вам назначена заявка №${number}`);
+			const pText = data.get(`payment_${executorId}`) as string || '';
+			sendPushNotification(executorId, 'Новая заявка', `Вам назначена заявка №${number}. Я получу: ${pText}`);
 		});
 	},
 	deleteTask: async ({ request, locals }) => {
@@ -124,13 +129,25 @@ export const actions: Actions = {
 
 		const toAdd = executorIds.filter(id => !existingUserIds.includes(id));
 		const toRemove = existingUserIds.filter(id => !executorIds.includes(id));
+		const toUpdate = executorIds.filter(id => existingUserIds.includes(id));
 
 		if (toRemove.length > 0) {
 			await prisma.taskAssignment.deleteMany({ where: { taskId, userId: { in: toRemove } } });
 		}
 		if (toAdd.length > 0) {
-			await prisma.taskAssignment.createMany({
-				data: toAdd.map(userId => ({ taskId, userId, autoRejectAt }))
+			for (const userId of toAdd) {
+				const pText = data.get(`payment_${userId}`) as string || '';
+				await prisma.taskAssignment.create({
+					data: { taskId, userId, autoRejectAt, paymentText: pText }
+				});
+				sendPushNotification(userId, 'Новая заявка', `Вам назначена заявка №${number}. Я получу: ${pText}`);
+			}
+		}
+		for (const userId of toUpdate) {
+			const pText = data.get(`payment_${userId}`) as string || '';
+			await prisma.taskAssignment.update({
+				where: { taskId_userId: { taskId, userId } },
+				data: { paymentText: pText }
 			});
 		}
 
