@@ -76,10 +76,11 @@
 		<!-- Админ/Менеджер вид -->
 		<div class="space-y-4">
 			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Исполнители ({executors.length})</h2>
-			{#each executors as exec}
+			{#each executors as exec, i}
 				<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
 					<button onclick={() => toggleExecutor(exec.id)} class="w-full px-6 py-5 flex items-center justify-between bg-gray-50 dark:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-left focus:outline-none">
 						<div class="flex items-center gap-3">
+							<div class="text-sm font-mono text-gray-400 w-4">{i + 1}</div>
 							<div class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs font-bold text-gray-700 dark:text-gray-300">
 								{exec.login[0].toUpperCase()}
 							</div>

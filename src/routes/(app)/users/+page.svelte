@@ -26,6 +26,7 @@
 			<table class="w-full text-left border-collapse">
 				<thead>
 					<tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
+						<th class="px-6 py-4 w-12">#</th>
 						<th class="px-6 py-4">Логин</th>
 						<th class="px-6 py-4">Дата регистрации</th>
 						<th class="px-6 py-4">Текущая роль</th>
@@ -33,8 +34,11 @@
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-50 dark:divide-gray-700">
-					{#each data.users as u}
+					{#each data.users as u, i}
 						<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
+							<td class="px-6 py-4 text-sm text-gray-400 font-mono">
+								{i + 1}
+							</td>
 							<td class="px-6 py-4">
 								<div class="flex items-center gap-3">
 									<div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-semibold border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300">

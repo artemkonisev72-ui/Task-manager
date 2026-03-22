@@ -2,7 +2,8 @@ import prisma from '$lib/server/prisma';
 import { json } from '@sveltejs/kit';
 
 export async function POST({ request, locals }) {
-	if (!locals.user || locals.user.role !== 'EXECUTOR') {
+	const user = locals.user;
+	if (!user || user.role !== 'EXECUTOR') {
 		return json({ error: 'Unauthorized' }, { status: 403 });
 	}
 
@@ -17,7 +18,7 @@ export async function POST({ request, locals }) {
 		where: {
 			taskId_userId: {
 				taskId: taskId,
-				userId: locals.user.id
+				userId: user.id
 			}
 		},
 		include: {
@@ -45,7 +46,7 @@ export async function POST({ request, locals }) {
 					data: managers.map(mgr => ({
 						userId: mgr.id,
 						title: 'Принятие заявки',
-						message: `Исполнитель ${locals.user.login} принял заявку №${assignment.task.number}.`
+						message: `Исполнитель ${user.login} принял заявку №${assignment.task.number}.`
 					}))
 				});
 			}
@@ -56,11 +57,6 @@ export async function POST({ request, locals }) {
 
 	if (action === 'REJECT') {
 		await prisma.$transaction(async (tx) => {
-			await tx.taskAssignment.update({
-				where: { id: assignment.id },
-				data: { status: 'REJECTED' }
-			});
-
 			const managers = await tx.user.findMany({
 				where: { role: { in: ['MANAGER', 'ADMIN'] } }
 			});
@@ -70,12 +66,17 @@ export async function POST({ request, locals }) {
 					data: managers.map(mgr => ({
 						userId: mgr.id,
 						title: 'Отказ от заявки',
-						message: `Исполнитель ${locals.user.login} отклонил заявку №${assignment.task.number}.`
+						message: `Исполнитель ${user.login} отклонил заявку №${assignment.task.number}.`
 					}))
 				});
 			}
+
+			// Delete assignment to detach user
+			await tx.taskAssignment.delete({
+				where: { id: assignment.id }
+			});
 		});
 
-		return json({ success: true, status: 'REJECTED' });
+		return json({ success: true, status: 'REJECTED_AND_REMOVED' });
 	}
 }

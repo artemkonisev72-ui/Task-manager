@@ -49,8 +49,8 @@ export const actions: Actions = {
 		// executors[] handling
 		const executorIds = data.getAll('executorIds') as string[];
 
-		if (!number || !dateStr || !timeStart || !timeEnd || !address || !logistics || !dealContent || !amountStr || executorIds.length === 0) {
-			return fail(400, { error: 'Заполните все обязательные поля и выберите хотя бы одного исполнителя' });
+		if (!number || !dateStr || executorIds.length === 0) {
+			return fail(400, { error: 'Номер, дата и хотя бы один исполнитель обязательны' });
 		}
 
 		const dateObj = new Date(dateStr);
@@ -66,11 +66,11 @@ export const actions: Actions = {
 				timeStart,
 				timeEnd,
 				address,
-				logistics,
-				dealContent,
+				logistics: logistics || '',
+				dealContent: dealContent || '',
 				comment,
 				checklist,
-				amount: parseFloat(amountStr),
+				amount: amountStr ? parseFloat(amountStr) : 0,
 				assignments: {
 					create: executorIds.map(id => ({ userId: id, autoRejectAt }))
 				}
@@ -112,8 +112,8 @@ export const actions: Actions = {
 		const amountStr = data.get('amount') as string;
 		const executorIds = data.getAll('executorIds') as string[];
 
-		if (!taskId || !number || !dateStr || !timeStart || !timeEnd || !address || !logistics || !dealContent || !amountStr || executorIds.length === 0) {
-			return fail(400, { error: 'Заполните все обязательные поля и выберите хотя бы одного исполнителя' });
+		if (!taskId || !number || !dateStr || executorIds.length === 0) {
+			return fail(400, { error: 'ID, номер, дата и хотя бы один исполнитель обязательны' });
 		}
 
 		const dateObj = new Date(dateStr);
@@ -143,11 +143,11 @@ export const actions: Actions = {
 				timeStart,
 				timeEnd,
 				address,
-				logistics,
-				dealContent,
+				logistics: logistics || '',
+				dealContent: dealContent || '',
 				comment,
 				checklist,
-				amount: parseFloat(amountStr)
+				amount: amountStr ? parseFloat(amountStr) : 0
 			}
 		});
 
