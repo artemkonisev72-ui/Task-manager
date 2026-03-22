@@ -42,12 +42,19 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	return { partner, messages };
 };
 
+import { sendPushNotification } from '$lib/server/push';
+
 export const actions: Actions = {
 	sendMessage: async ({ request, locals, params }) => {
 		if (!locals.user) return fail(401, { error: 'Не авторизован' });
 		const data = await request.formData();
 		const content = data.get('content') as string;
 		if (!content || !content.trim()) return fail(400, { error: 'Пустое сообщение' });
+
+		const recipient = await prisma.user.findUnique({
+			where: { id: params.userId },
+			select: { role: true }
+		});
 
 		await prisma.message.create({
 			data: {
@@ -56,5 +63,14 @@ export const actions: Actions = {
 				content: content.trim()
 			}
 		});
+
+		// Trigger push notification if manager/admin sends to executor
+		if (
+			recipient?.role === 'EXECUTOR' && 
+			(locals.user.role === 'MANAGER' || locals.user.role === 'ADMIN')
+		) {
+			const body = content.length > 50 ? content.substring(0, 50) + '...' : content;
+			await sendPushNotification(params.userId, 'Новое сообщение от логиста', body);
+		}
 	}
 };
