@@ -4,6 +4,7 @@ import prisma from '$lib/server/prisma';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
 	if (!locals.user) throw redirect(303, '/login');
+	if (locals.user.role === 'ADMIN') throw redirect(303, '/requests');
 	
 	const partnerId = params.userId;
 	if (locals.user.id === partnerId) throw redirect(303, '/chat');

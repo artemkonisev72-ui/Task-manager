@@ -6,32 +6,25 @@ import { sendPushNotification } from '$lib/server/push';
 export const load: PageServerLoad = async ({ parent }) => {
 	const { user } = await parent();
 
-	if (user.role === 'ADMIN' || user.role === 'MANAGER') {
-		const executorsRaw = await prisma.user.findMany({
-			where: { role: 'EXECUTOR' },
-			include: { assignments: { include: { task: true }, orderBy: { task: { date: 'desc' } } } }
-		});
-		const executors = executorsRaw.map(e => ({
-			id: e.id, login: e.login, role: e.role,
-			logisticsTasks: e.assignments.map(a => ({ ...a.task, assignmentStatus: a.status }))
-		}));
-
-		const unassignedTasks = await prisma.logisticsTask.findMany({
-			where: { assignments: { none: {} } },
-			orderBy: { date: 'desc' }
-		});
-
-		return { executors, unassignedTasks, isManager: true };
-	} else {
-		// EXECUTOR
-		const tasksRaw = await prisma.logisticsTask.findMany({
-			where: { assignments: { some: { userId: user.id } } },
-			orderBy: { date: 'desc' },
-			include: { assignments: { where: { userId: user.id } } }
-		});
-		const tasks = tasksRaw.map(t => ({ ...t, assignmentStatus: t.assignments[0]?.status }));
-		return { tasks, unassignedTasks: [], isManager: false };
+	if (user.role === 'EXECUTOR') {
+		throw redirect(303, '/requests');
 	}
+
+	const executorsRaw = await prisma.user.findMany({
+		where: { role: 'EXECUTOR' },
+		include: { assignments: { include: { task: true }, orderBy: { task: { date: 'desc' } } } }
+	});
+	const executors = executorsRaw.map(e => ({
+		id: e.id, login: e.login, role: e.role,
+		logisticsTasks: e.assignments.map(a => ({ ...a.task, assignmentStatus: a.status }))
+	}));
+
+	const unassignedTasks = await prisma.logisticsTask.findMany({
+		where: { assignments: { none: {} } },
+		orderBy: { date: 'desc' }
+	});
+
+	return { executors, unassignedTasks, isManager: true };
 };
 
 export const actions: Actions = {

@@ -290,7 +290,7 @@
 					</button>
 
 					{#if showNotifications}
-						<div class="absolute top-12 left-0 md:-left-2 w-72 md:w-80 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-xl rounded-2xl z-50 overflow-hidden">
+						<div class="absolute top-12 right-0 md:left-0 w-[280px] md:w-80 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-2xl rounded-2xl z-50 overflow-hidden ring-1 ring-black/5 dark:ring-white/10">
 							<div class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
 								<h3 class="font-bold text-gray-900 dark:text-gray-100">Уведомления</h3>
 								<button onclick={() => showNotifications = false} class="text-xs font-semibold text-gray-500 hover:text-black dark:hover:text-white">Закрыть</button>
@@ -315,20 +315,24 @@
 		</div>
 
 		<nav class="flex-1 space-y-2">
-			<a href="/logistics" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
-				{data.user.role === 'EXECUTOR' ? 'Мои заявки' : 'Исполнители'}
-			</a>
+			{#if data.user.role !== 'EXECUTOR'}
+				<a href="/logistics" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+					Исполнители
+				</a>
+			{/if}
 			<a href="/requests" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
 				Заявки
 			</a>
-			<a href="/chat" class="px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex justify-between items-center">
-				<span>Чат</span>
-				{#if unreadChatCount > 0}
-					<span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[18px] text-center">
-						{unreadChatCount}
-					</span>
-				{/if}
-			</a>
+			{#if data.user.role !== 'ADMIN'}
+				<a href="/chat" class="px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex justify-between items-center">
+					<span>Чат</span>
+					{#if unreadChatCount > 0}
+						<span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[18px] text-center">
+							{unreadChatCount}
+						</span>
+					{/if}
+				</a>
+			{/if}
 			<a href="/users" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
 				Пользователи
 			</a>
