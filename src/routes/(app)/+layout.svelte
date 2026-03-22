@@ -303,6 +303,9 @@
 			<a href="/requests" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
 				Заявки
 			</a>
+			<a href="/chat" class="px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex justify-between items-center">
+				<span>Чат</span>
+			</a>
 			<a href="/users" class="block px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
 				Пользователи
 			</a>
