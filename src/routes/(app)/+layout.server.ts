@@ -8,8 +8,8 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		throw redirect(303, '/login');
 	}
 
-	let pendingAssignments = [];
-	let notifications = [];
+	let pendingAssignments: any[] = [];
+	let notifications: any[] = [];
 
 	if (locals.user.role === 'EXECUTOR' || locals.user.role === 'MANAGER' || locals.user.role === 'ADMIN') {
 		await cleanupExpiredAssignments();

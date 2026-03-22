@@ -44,6 +44,12 @@
 	let savingProfile = $state(false);
 	let profileSuccess = $state(false);
 
+	let unreadChatCount = $state(0);
+	$effect(() => {
+		unreadChatCount = data.unreadMessagesCount;
+	});
+	let chatPollInterval: ReturnType<typeof setInterval> | undefined;
+
 	let showNotifications = $state(false);
 	let rejectActionLoading = $state(false);
 	let timerInterval: ReturnType<typeof setInterval> | undefined;
@@ -128,11 +134,23 @@
 
 		timerInterval = setInterval(() => { now = Date.now(); }, 1000);
 		pollInterval = setInterval(backgroundPoll, 30000);
+
+		chatPollInterval = setInterval(async () => {
+			if (!data.user) return;
+			try {
+				const res = await fetch('/api/chat/unread');
+				if (res.ok) {
+					const json = await res.json();
+					unreadChatCount = json.count;
+				}
+			} catch (e) {}
+		}, 3000);
 	});
 
 	onDestroy(() => {
 		if (timerInterval) clearInterval(timerInterval);
 		if (pollInterval) clearInterval(pollInterval);
+		if (chatPollInterval) clearInterval(chatPollInterval);
 	});
 
 	function applyTheme() {
@@ -305,9 +323,9 @@
 			</a>
 			<a href="/chat" class="px-4 py-3 rounded-2xl font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex justify-between items-center">
 				<span>Чат</span>
-				{#if data.unreadMessagesCount > 0}
+				{#if unreadChatCount > 0}
 					<span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[18px] text-center">
-						{data.unreadMessagesCount}
+						{unreadChatCount}
 					</span>
 				{/if}
 			</a>
